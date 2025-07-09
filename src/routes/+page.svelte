@@ -64,15 +64,11 @@
   </div>
 
   <!-- Main Content Row -->
-  <div class="row">
-    <!-- Map Container -->
-    <div id="map-container">
-      <MapContainer />
-      
-      <!-- Date Slider -->
-      <div class="slider-container">
-        <DateSlider />
-      </div>
+  <div class="content-wrapper">
+    <MapContainer slot="map" />
+    
+    <div class="slider-container" slot="slider">
+      <DateSlider />
     </div>
 
     <!-- Sidebar -->
@@ -93,7 +89,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: auto;
+    height: 100%;
   }
 
   .filters-row {
@@ -104,36 +100,32 @@
     flex-wrap: wrap;
   }
 
-  .row {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: auto;
-  }
-
-  #map-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    width: 75%;
-    margin-right: 10px;
+  .content-wrapper {
     position: relative;
-  }
-
-  #sidebar {
-    flex: 1;
-    height: 450px;
-    box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
-    overflow-y: auto;
-    width: 25%;
+    width: 100%;
+    height: calc(100vh - 200px); /* Adjust based on your layout */
+    display: flex;
   }
 
   .slider-container {
-    position: relative;
-    width: 100%;
-    padding: 20px 0;
-    margin-top: -50px;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    z-index: 2;
+  }
+
+  #sidebar {
+    width: 25%;
+    height: 100%;
+    box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    overflow-y: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 2;
   }
 
   .histogram-container {
@@ -143,24 +135,27 @@
 
   /* Responsive design */
   @media (max-width: 768px) {
-    .row {
+    .content-wrapper {
       flex-direction: column;
-    }
-    
-    #map-container {
-      width: 100%;
-      margin-right: 0;
-      margin-bottom: 1rem;
+      height: auto;
     }
     
     #sidebar {
       width: 100%;
       height: 300px;
+      position: static;
     }
     
     .filters-row {
       flex-direction: column;
       align-items: stretch;
+    }
+
+    .slider-container {
+      position: static;
+      transform: none;
+      width: 100%;
+      margin-top: 20px;
     }
   }
 </style>
