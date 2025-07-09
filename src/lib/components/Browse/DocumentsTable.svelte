@@ -283,4 +283,99 @@
 	
 	.description-cell {
 		max-width: 300px;
-		word-wrap: break-
+		word-wrap: break-word;
+		line-height: 1.4;
+	}
+	
+	.no-results {
+		text-align: center;
+		color: #666;
+		font-style: italic;
+		padding: var(--spacing-xl);
+	}
+	
+	.pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: var(--spacing-sm);
+		margin-top: var(--spacing-lg);
+	}
+	
+	.pagination button {
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: 1px solid var(--border-color);
+		background: white;
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		font-size: var(--font-sm);
+		transition: all 0.2s ease;
+	}
+	
+	.pagination button:hover:not(:disabled) {
+		background-color: var(--hover-color);
+		border-color: var(--primary-color);
+	}
+	
+	.pagination button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	
+	.page-btn.active {
+		background-color: var(--primary-color);
+		color: white;
+		border-color: var(--primary-color);
+	}
+	
+	/* Responsive design */
+	@media (max-width: 768px) {
+		.table-controls {
+			flex-direction: column;
+			align-items: stretch;
+		}
+		
+		.search-input {
+			max-width: none;
+		}
+		
+		.documents-table th,
+		.documents-table td {
+			padding: var(--spacing-sm);
+		}
+		
+		.title-cell,
+		.archive-cell,
+		.signature-cell,
+		.type-cell {
+			min-width: auto;
+		}
+		
+		.description-cell {
+			max-width: 200px;
+		}
+		
+		.pagination {
+			flex-wrap: wrap;
+		}
+	}
+	
+	@media (max-width: 480px) {
+		.documents-table {
+			font-size: var(--font-sm);
+		}
+		
+		.documents-table th,
+		.documents-table td {
+			padding: var(--spacing-xs);
+		}
+		
+		.description-cell {
+			max-width: 150px;
+		}
+		
+		.pagination button {
+			padding: var(--spacing-xs) var(--spacing-sm);
+		}
+	}
+</style>
