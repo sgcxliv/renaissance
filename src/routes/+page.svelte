@@ -65,10 +65,12 @@
 
   <!-- Main Content Row -->
   <div class="content-wrapper">
-    <MapContainer slot="map" />
-    
-    <div class="slider-container" slot="slider">
-      <DateSlider />
+    <div class="map-slider-container">
+      <MapContainer />
+      
+      <div class="slider-container">
+        <DateSlider />
+      </div>
     </div>
 
     <!-- Sidebar -->
@@ -101,10 +103,15 @@
   }
 
   .content-wrapper {
-    position: relative;
+    display: flex;
     width: 100%;
     height: calc(100vh - 200px); /* Adjust based on your layout */
-    display: flex;
+  }
+
+  .map-slider-container {
+    position: relative;
+    width: 75%;
+    height: 100%;
   }
 
   .slider-container {
@@ -119,13 +126,9 @@
   #sidebar {
     width: 25%;
     height: 100%;
-    box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
     overflow-y: auto;
-    position: absolute;
-    right: 0;
-    top: 0;
-    z-index: 2;
   }
 
   .histogram-container {
@@ -140,10 +143,14 @@
       height: auto;
     }
     
+    .map-slider-container {
+      width: 100%;
+      height: 450px; /* Adjust as needed */
+    }
+
     #sidebar {
       width: 100%;
       height: 300px;
-      position: static;
     }
     
     .filters-row {
