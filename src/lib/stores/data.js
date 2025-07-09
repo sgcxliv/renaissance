@@ -1,4 +1,5 @@
 import { writable, derived } from 'svelte/store';
+import { fetchSheetData } from '$lib/utils/dataFetcher'; 
 
 // Global MAP object equivalent
 export const mapData = writable({
@@ -7,7 +8,9 @@ export const mapData = writable({
   activeResults: null,
   lookup: {},
   index: {},
-  METADATA: {}
+  METADATA: {},
+  isLoading: false,
+  error: null
 });
 
 // Map instance and markers
@@ -78,3 +81,40 @@ export const headerIndex = derived(mapData, ($mapData) => {
   
   return output;
 });
+
+// Function to initialize data
+export async function initializeData() {
+  mapData.update(d => ({ ...d, isLoading: true, error: null }));
+  
+  try {
+    const sheets = ['Events', 'Locations', 'Bio_Composers', 'Bio_Musicians', 'Bio_Nonmusicians', 'Institutions', 'Headers'];
+    const data = {};
+    
+    for (const sheet of sheets) {
+      data[sheet] = await fetchSheetData(sheet);
+    }
+    
+    mapData.update(d => ({ 
+      ...d, 
+      METADATA: data, 
+      isLoading: false 
+    }));
+  } catch (error) {
+    console.error('Failed to load data:', error);
+    mapData.update(d => ({ ...d, isLoading: false, error: error.message }));
+  }
+}
+
+// Function to refresh a specific sheet
+export async function refreshSheet(sheetName) {
+  try {
+    const sheetData = await fetchSheetData(sheetName);
+    mapData.update(d => ({
+      ...d,
+      METADATA: { ...d.METADATA, [sheetName]: sheetData }
+    }));
+  } catch (error) {
+    console.error(`Failed to refresh ${sheetName}:`, error);
+    // Optionally update error state
+  }
+}
