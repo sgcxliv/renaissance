@@ -36,6 +36,12 @@
 
   <main class="page-content">
     <div class="wrapper">
+      <div class="map-container">
+        <slot name="map" />
+      </div>
+      <div class="slider-container">
+        <slot name="slider" />
+      </div>
       <slot />
     </div>
   </main>
@@ -56,5 +62,29 @@
 
   .error {
     color: red;
+  }
+
+  .wrapper {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 100px); /* Adjust based on your header and footer height */
+  }
+
+  .map-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .slider-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    z-index: 2;
   }
 </style>
