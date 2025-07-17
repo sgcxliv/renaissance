@@ -11,7 +11,7 @@ export const filters = writable({
   showNonMusicians: true,
   
   // Date range
-  dateRange: { min: 1400, max: 1590 },
+  dateRange: { min: 1400, max: 1600 },
   
   // Certainty filter
   showCertainty: false,
@@ -69,10 +69,13 @@ export function resetFilters() {
     showComposers: true,
     showMusicians: true,
     showNonMusicians: true,
-    dateRange: { min: 1400, max: 1590 },
+    dateRange: { min: 1400, max: 1600 },
     showCertainty: false,
     searchText: '',
     institutionFilter: null,
     activeNames: new Set()
   });
 }
+
+export const dateSliderMin = 1400;
+export const dateSliderMax = 1600;
