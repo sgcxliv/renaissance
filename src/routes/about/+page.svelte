@@ -36,15 +36,15 @@
         <h2>Legend</h2>
         <div class="legend">
             <div class="legend-item">
-                <span class="color-sample" style="background-color: var(--primary-color);"></span>
+                <span class="color-sample" style="background-color: #8B4513;"></span>
                 Composers
             </div>
             <div class="legend-item">
-                <span class="color-sample" style="background-color: var(--secondary-color);"></span>
+                <span class="color-sample" style="background-color: #CD853F;"></span>
                 Musicians
             </div>
             <div class="legend-item">
-                <span class="color-sample" style="background-color: var(--accent-color);"></span>
+                <span class="color-sample" style="background-color: #DAA520;"></span>
                 Non-Musicians
             </div>
         </div>
@@ -55,48 +55,120 @@
     .about-page {
         max-width: 800px;
         margin: 0 auto;
-        padding: var(--spacing-xl);
+        padding: 2rem;
         line-height: 1.6;
+        font-family: 'Georgia', serif;
+        color: #2C1810;
+        background-color: #FFF8E1;
+        min-height: 100vh;
     }
 
     h1 {
-        color: var(--primary-color);
-        margin-bottom: var(--spacing-xl);
+        color: #8B4513;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+        text-align: center;
+        border-bottom: 2px solid #CD853F;
+        padding-bottom: 1rem;
     }
 
     h2 {
-        color: var(--text-color);
-        margin: var(--spacing-xl) 0 var(--spacing-md) 0;
+        color: #5D4037;
+        margin: 2rem 0 1rem 0;
+        font-size: 1.5rem;
+        border-left: 4px solid #DAA520;
+        padding-left: 1rem;
     }
 
     section {
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: 2rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 1px solid #D7CCC8;
+    }
+
+    p {
+        margin-bottom: 1rem;
+        color: #2C1810;
+        font-size: 1.1rem;
     }
 
     ul {
-        padding-left: var(--spacing-lg);
+        padding-left: 1.5rem;
+        color: #2C1810;
     }
 
     li {
-        margin-bottom: var(--spacing-xs);
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
     }
 
     .legend {
         display: flex;
         flex-direction: column;
-        gap: var(--spacing-sm);
+        gap: 0.75rem;
+        background: #F5F5DC;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #D7CCC8;
     }
 
     .legend-item {
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: 0.75rem;
+        font-weight: 500;
+        font-size: 1rem;
     }
 
     .color-sample {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         display: inline-block;
+        border: 2px solid white;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .about-page {
+            padding: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        section {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        p, li {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .about-page {
+            padding: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        section {
+            padding: 0.75rem;
+        }
     }
 </style>
