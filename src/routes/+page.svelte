@@ -184,9 +184,9 @@
 
       <!-- Histogram with comprehensive debug info -->
       <div class="histogram-container">
-        <div class="histogram-debug" style="background: #f0f8ff; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;">
-          <h4 style="margin: 0 0 10px 0; color: #333;">Histogram Debug Info</h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
+        <div class="histogram-debug">
+          <h4>Histogram Debug Info</h4>
+          <div class="debug-grid">
             <div>
               <strong>Data Status:</strong><br>
               • Data Loaded: {dataLoaded ? '✅ Yes' : '❌ No'}<br>
@@ -214,9 +214,9 @@
           </div>
           
           {#if $filteredEvents?.length > 0}
-            <details style="margin-top: 10px;">
-              <summary style="cursor: pointer; font-weight: bold;">Sample Event Data</summary>
-              <pre style="background: #f9f9f9; padding: 10px; overflow: auto; font-size: 11px; margin-top: 5px;">{JSON.stringify($filteredEvents[0], null, 2)}</pre>
+            <details class="sample-data">
+              <summary>Sample Event Data</summary>
+              <pre>{JSON.stringify($filteredEvents[0], null, 2)}</pre>
             </details>
           {/if}
         </div>
@@ -271,7 +271,7 @@
   .content-wrapper {
     display: flex;
     width: 100%;
-    height: calc(100vh - 350px); /* Adjusted to account for filters and histogram */
+    height: calc(100vh - 350px);
   }
 
   .map-slider-container {
@@ -308,6 +308,43 @@
     padding: 20px;
     background-color: #fff;
     border-top: 1px solid #dee2e6;
+  }
+
+  .histogram-debug {
+    background: #f0f8ff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  .histogram-debug h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+
+  .debug-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .sample-data {
+    margin-top: 10px;
+  }
+
+  .sample-data summary {
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .sample-data pre {
+    background: #f9f9f9;
+    padding: 10px;
+    overflow: auto;
+    font-size: 11px;
+    margin-top: 5px;
   }
 
   .loading-container {
@@ -424,33 +461,3 @@
       margin-top: 20px;
       background: white;
     }
-
-    .histogram-container {
-      margin-top: 10px;
-      padding: 10px;
-    }
-
-    .histogram-debug {
-      font-size: 12px !important;
-    }
-
-    .histogram-debug div {
-      grid-template-columns: 1fr !important;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .container {
-      padding: 0;
-    }
-
-    .filters-row {
-      padding: 0.5rem;
-    }
-
-    .histogram-container {
-      padding: 10px;
-    }
-
-    .loading-content {
-      padding: 1rem;
