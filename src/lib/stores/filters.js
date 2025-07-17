@@ -1,24 +1,48 @@
-import { writable, derived } from 'svelte/store';
+import { writable } from 'svelte/store';
 
-// Filter states
 export const filters = writable({
+  // Person type filters
   showComposers: true,
   showMusicians: true,
-  showNonMusicians: false,
-  showCertainty: true,
-  searchText: '',
+  showNonMusicians: true,
+  
+  // Date range
   dateRange: { min: 1400, max: 1590 },
+  
+  // Other filters
+  showCertainty: false,
+  searchText: '',
   institutionFilter: null,
   activeNames: new Set()
 });
 
-// Date slider values
-export const dateSliderMin = writable(1400);
-export const dateSliderMax = writable(1590);
+// Helper functions to update specific filters
+export function updatePersonTypeFilters(composers, musicians, nonMusicians) {
+  filters.update(f => ({
+    ...f,
+    showComposers: composers,
+    showMusicians: musicians,
+    showNonMusicians: nonMusicians
+  }));
+}
 
-// Institution filter
-export const institutionFilter = writable(null);
+export function updateDateRange(min, max) {
+  filters.update(f => ({
+    ...f,
+    dateRange: { min, max }
+  }));
+}
 
-// Search and autocomplete
-export const searchResults = writable([]);
-export const searchCount = writable(0);
+export function updateSearchText(text) {
+  filters.update(f => ({
+    ...f,
+    searchText: text
+  }));
+}
+
+export function updateInstitutionFilter(institutionId) {
+  filters.update(f => ({
+    ...f,
+    institutionFilter: institutionId
+  }));
+}
