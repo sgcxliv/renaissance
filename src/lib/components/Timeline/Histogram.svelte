@@ -9,12 +9,33 @@
 
   let maxCount = 0;
   let histogramData = {};
+  let debugInfo = '';
 
-  // Reactive histogram generation
+  // Reactive histogram generation with detailed debugging
   $: {
     const events = $sidebarState.activeMarkers || [];
+    
+    debugInfo = `
+      Events received: ${events.length}
+      Sample event: ${events.length > 0 ? JSON.stringify(events[0], null, 2) : 'None'}
+    `;
+    
+    console.log('=== Histogram Debug ===');
+    console.log('Events for histogram:', events.length);
+    if (events.length > 0) {
+      console.log('Sample event:', events[0]);
+      console.log('Event structure check:');
+      console.log('- EYEAR:', events[0].EYEAR);
+      console.log('- LYEAR:', events[0].LYEAR);
+      console.log('- BIOID:', events[0].BIOID);
+    }
+    
     histogramData = generateHistogramData(events, START_YEAR, END_YEAR);
     maxCount = Math.max(...Object.values(histogramData), 1);
+    
+    console.log('Generated histogram data:', histogramData);
+    console.log('Max count:', maxCount);
+    console.log('======================');
   }
 
   // Generate decades array for iteration
@@ -29,10 +50,10 @@
   }
 
   function getBarHeight(count) {
-    if (maxCount === 0) return '0px';
+    if (maxCount === 0) return '2px'; // Minimum visible height
     const percentage = (count / maxCount) * 100;
     const maxHeight = 100; // Maximum bar height in pixels
-    return `${Math.max(1, (percentage / 100) * maxHeight)}px`;
+    return `${Math.max(2, (percentage / 100) * maxHeight)}px`;
   }
 
   function getDecadeLabel(year) {
@@ -40,6 +61,7 @@
   }
 
   function handleBarClick(decade) {
+    console.log('Bar clicked for decade:', decade);
     // Update date slider to focus on this decade
     filters.update(f => ({
       ...f,
@@ -50,6 +72,14 @@
 
 <div class="histogram-container">
   <h3>Events by Decade</h3>
+  
+  <!-- Detailed debug section -->
+  <details style="margin-bottom: 1rem; background: #f5f5f5; padding: 10px;">
+    <summary style="cursor: pointer; font-weight: bold;">Debug Info (click to expand)</summary>
+    <pre style="font-size: 11px; overflow: auto;">{debugInfo}</pre>
+    <p><strong>Histogram Data:</strong></p>
+    <pre style="font-size: 11px;">{JSON.stringify(histogramData, null, 2)}</pre>
+  </details>
   
   <table class="histogram">
     <tbody>
