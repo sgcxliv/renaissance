@@ -1,5 +1,9 @@
 import { writable } from 'svelte/store';
 
+/**
+ * Filters store for managing all filtering options
+ * Matches the structure expected by filterHelpers.js
+ */
 export const filters = writable({
   // Person type filters
   showComposers: true,
@@ -9,10 +13,16 @@ export const filters = writable({
   // Date range
   dateRange: { min: 1400, max: 1590 },
   
-  // Other filters
+  // Certainty filter
   showCertainty: false,
+  
+  // Text search
   searchText: '',
+  
+  // Institution filter
   institutionFilter: null,
+  
+  // Active names filter (for advanced filtering)
   activeNames: new Set()
 });
 
@@ -45,4 +55,24 @@ export function updateInstitutionFilter(institutionId) {
     ...f,
     institutionFilter: institutionId
   }));
+}
+
+export function updateCertaintyFilter(showCertainty) {
+  filters.update(f => ({
+    ...f,
+    showCertainty
+  }));
+}
+
+export function resetFilters() {
+  filters.set({
+    showComposers: true,
+    showMusicians: true,
+    showNonMusicians: true,
+    dateRange: { min: 1400, max: 1590 },
+    showCertainty: false,
+    searchText: '',
+    institutionFilter: null,
+    activeNames: new Set()
+  });
 }
