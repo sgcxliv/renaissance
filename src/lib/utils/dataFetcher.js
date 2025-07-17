@@ -1,59 +1,64 @@
 const WEBAPP_URL = 'https://script.google.com/a/macros/stanford.edu/s/AKfycbzSaTTclxO-sOMOqPUgJkCeFWyMqHyhCvh_EjQd6UohLnBzUbh8l0-Eozt2mLa-CoDwow/exec';
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export async function fetchSheetData(sheetName) {
-  const url = `${WEBAPP_URL}?sheet=${sheetName}`;
   try {
+    console.log(`Fetching data for sheet: ${sheetName}`);
+    
+    const url = `${APPS_SCRIPT_URL}?sheet=${encodeURIComponent(sheetName)}`;
+    
     const response = await fetch(url, {
       method: 'GET',
-      mode: 'cors',
-      credentials: 'include',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json'
+      }
     });
-    
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error response for ${sheetName}:`, response.status, errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
-    console.log(`Successfully fetched data for ${sheetName}`);
+    
+    // Check if the response contains an error
+    if (data.error) {
+      throw new Error(`Server error: ${data.message || data.error}`);
+    }
+
+    console.log(`Successfully fetched ${data.length} records for ${sheetName}`);
     return data;
+    
   } catch (error) {
     console.error(`Error fetching ${sheetName}:`, error);
-    throw error;
+    throw new Error(`Failed to fetch ${sheetName}: ${error.message}`);
   }
 }
 
-export async function loadAllData() {
-  const sheets = ['Events', 'Locations', 'Bio_Composers', 'Bio_Musicians', 'Bio_Nonmusicians', 'Institutions'];
-  const data = {};
+export async function fetchAllSheets() {
+  const sheets = [
+    'Events', 
+    'Locations', 
+    'Bio_Composers', 
+    'Bio_Musicians', 
+    'Bio_Nonmusicians', 
+    'Institutions', 
+    'Headers',
+    'Doc_Entries',
+    'Occasions',
+    'Archival_Docs',
+    'Bibliography'
+  ];
+  
+  const results = {};
+  
   for (const sheet of sheets) {
     try {
-      data[sheet] = await fetchSheetData(sheet);
-      await delay(1000); // 1 second delay between requests
+      results[sheet] = await fetchSheetData(sheet);
     } catch (error) {
-      console.error(`Failed to load data for ${sheet}:`, error);
-
+      console.error(`Failed to fetch ${sheet}:`, error);
+      results[sheet] = [];
     }
   }
-  return data;
-}
-
-export async function loadSingleSheet(sheetName) {
-  try {
-    const data = await fetchSheetData(sheetName);
-    console.log(`Data for ${sheetName}:`, data);
-    return data;
-  } catch (error) {
-    console.error(`Failed to load data for ${sheetName}:`, error);
-    throw error;
-  }
+  
+  return results;
 }
