@@ -1,6 +1,7 @@
 import { writable, derived } from 'svelte/store';
-import { mapData } from './data.js';
+import { mapData, lookupTables } from './data.js';
 import { filters } from './filters.js';
+import { applyFilters } from '$lib/utils/filterHelpers.js';
 
 export const mapState = writable({
   center: [45.0, 10.0],
@@ -11,57 +12,44 @@ export const mapState = writable({
 export const sidebarState = writable({
   isOpen: true,
   activeEvents: [],
-  activeMarkers: []
+  activeMarkers: [],
+  totalEvents: 0
 });
 
-// Derived store that processes events from mapData
-export const processedEvents = derived(
-  [mapData, filters],
-  ([$mapData, $filters]) => {
-    // Get events from METADATA
-    const events = $mapData.METADATA?.Events || [];
+// Derived store that gets and filters events
+export const filteredEvents = derived(
+  [mapData, filters, lookupTables],
+  ([$mapData, $filters, $lookupTables]) => {
+    console.log('filteredEvents derived - starting');
+    console.log('mapData METADATA:', $mapData.METADATA);
+    console.log('filters:', $filters);
+    console.log('lookupTables:', $lookupTables);
     
-    if (!Array.isArray(events)) {
-      console.log('No events array found in mapData.METADATA');
+    // Get raw events from METADATA
+    const rawEvents = $mapData.METADATA?.Events || [];
+    
+    if (!Array.isArray(rawEvents)) {
+      console.log('No events array found');
       return [];
     }
     
-    console.log('Processing events:', events.length);
+    console.log('Raw events count:', rawEvents.length);
     
-    // Apply filters here if needed
-    let filteredEvents = events;
+    // Apply filters
+    const filtered = applyFilters(rawEvents, $filters, $lookupTables, {});
     
-    // Example filtering (adjust based on your filter structure)
-    if ($filters.dateRange) {
-      filteredEvents = filteredEvents.filter(event => {
-        const eventYear = extractEventYear(event);
-        return eventYear >= $filters.dateRange.min && eventYear <= $filters.dateRange.max;
-      });
-    }
-    
-    return filteredEvents;
+    console.log('Filtered events count:', filtered.length);
+    return filtered;
   }
 );
 
-// Update sidebarState when processedEvents changes
-processedEvents.subscribe(events => {
+// Update sidebarState when filteredEvents changes
+filteredEvents.subscribe(events => {
+  console.log('Updating sidebarState with', events.length, 'events');
   sidebarState.update(state => ({
     ...state,
     activeMarkers: events,
-    activeEvents: events
+    activeEvents: events,
+    totalEvents: events.length
   }));
 });
-
-function extractEventYear(event) {
-  // Same function as in filterHelpers.js
-  if (event.year) return parseInt(event.year);
-  if (event.date) {
-    const match = event.date.match(/(\d{4})/);
-    return match ? parseInt(match[1]) : null;
-  }
-  if (event.Date) {
-    const match = event.Date.match(/(\d{4})/);
-    return match ? parseInt(match[1]) : null;
-  }
-  return null;
-}
