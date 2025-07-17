@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 
 /**
  * Filters store for managing all filtering options
@@ -79,3 +79,8 @@ export function resetFilters() {
 
 export const dateSliderMin = 1400;
 export const dateSliderMax = 1600;
+
+export const searchResults = writable([]);
+
+// derived store for count
+export const searchCount = derived(searchResults, $results => $results.length);
