@@ -9,18 +9,31 @@
   const error = writable(null);
 
   onMount(async () => {
+    console.log('onMount running!');
     try {
       isLoading.set(true);
-      const metadata = await loadAllMetadata();
-      mapData.update(data => ({
-        ...data,
-        METADATA: metadata
-      }));
+      // temporarily comment out actual api call to see if store logic breaks
+      // const metadata = await loadAllMetadata();
+      // mapData.update(data => ({
+      //   ...data,
+      //   METADATA: metadata
+      // }));
+      isLoading.set(false);
+      error.set(null);
     } catch (err) {
       console.error('Failed to load metadata:', err);
       error.set('Failed to load data. Please try again later.');
-    } finally {
       isLoading.set(false);
     }
   });
 </script>
+
+DEBUG BEFORE IF BLOCKS
+
+{#if $isLoading}
+  <div class="loading">Loading...</div>
+{:else if $error}
+  <div class="error">{$error}</div>
+{:else}
+  <div style="color: green;">BODY RENDERED</div>
+{/if}
