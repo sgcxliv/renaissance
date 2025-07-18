@@ -118,6 +118,8 @@ export const mappableEvents = derived(
     return mappable;
   }
 );
+console.debug('✅ filteredEvents in map.js:', filteredEvents);
+
 
 /**
  * Update sidebarState when filteredEvents changes

@@ -48,7 +48,12 @@
     console.log('loadingError:', loadingError);
     console.log('mapData.METADATA keys:', Object.keys($mapData.METADATA || {}));
     console.log('raw events count:', $mapData.METADATA?.Events?.length || 0);
-    console.log('filteredEvents count:', $filteredEvents?.length || 0);
+    if ($filteredEvents && typeof $filteredEvents.length === 'number') {
+        console.log('filteredEvents count:', $filteredEvents.length);
+        } else {
+        console.warn('filteredEvents not ready or not an array:', $filteredEvents);
+    }
+
     console.log('sidebarState activeMarkers:', $sidebarState.activeMarkers?.length || 0);
     console.log('current filters:', $filters);
     console.log('==================');
