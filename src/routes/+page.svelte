@@ -161,7 +161,7 @@
         Retry Loading Data
       </button>
     </div>
-  {:else if dataLoaded}
+  {:else} 
     <!-- Main application -->
     <div class="container">
       <!-- Search and Filters Row -->
