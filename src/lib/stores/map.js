@@ -121,6 +121,10 @@ export const mappableEvents = derived(
 /**
  * Update sidebarState when filteredEvents changes
  */
+console.log('filteredEvents here:', filteredEvents, typeof filteredEvents);
+if (!filteredEvents || typeof filteredEvents.subscribe !== 'function') {
+  throw new Error('filteredEvents does not have a subscribe method:', filteredEvents);
+}
 filteredEvents.subscribe(events => {
   console.log('Updating sidebarState with', events.length, 'filtered events');
   sidebarState.update(state => ({
