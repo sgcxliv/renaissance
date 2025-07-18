@@ -1,21 +1,9 @@
 <script>
-  import { mapData, lookupTables } from '$lib/stores/data.js';
-  import { filters } from '$lib/stores/filters.js';
-  import { mapState, sidebarState, filteredEvents } from '$lib/stores/map.js';
-
-  import MapContainer from '$lib/components/Map/MapContainer.svelte';
-  import PersonTypeFilter from '$lib/components/Filters/PersonTypeFilter.svelte';
-  import DateSlider from '$lib/components/Filters/DateSlider.svelte';
-  import InstitutionFilter from '$lib/components/Filters/InstitutionFilter.svelte';
-  import SearchBox from '$lib/components/Filters/SearchBox.svelte';
-  import EventsList from '$lib/components/Sidebar/EventsList.svelte';
-  import Histogram from '$lib/components/Timeline/Histogram.svelte';
-
-  // If you want hardcoded some UI state for design, you can set:
-  // let filters = {};
-  // let filteredEvents = [];
-  // let mapData = {};
-  // let sidebarState = {};
+  import { writable } from 'svelte/store';
+  const mapData = writable({ METADATA: { Events: [] } });
+  const filteredEvents = writable([]);
+  const sidebarState = writable({});
+  const filters = writable({});
 </script>
 
 <svelte:head>
