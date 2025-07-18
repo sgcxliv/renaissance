@@ -25,10 +25,10 @@
   });
 </script>
 
-{#if $isLoading}
+{#if isLoading}
   <div class="loading">Loading...</div>
-{:else if $error}
-  <div class="error">{$error}</div>
+{:else if error}
+  <div class="error">{error}</div>
 {:else}
   <header>
     <!-- Add your navigation component here -->
