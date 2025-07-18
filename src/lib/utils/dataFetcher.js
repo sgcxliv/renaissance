@@ -4,7 +4,7 @@ export async function fetchSheetData(sheetName) {
   try {
     console.log(`Fetching data for sheet: ${sheetName}`);
     
-    const url = `${APPS_SCRIPT_URL}?sheet=${encodeURIComponent(sheetName)}`;
+    const url = `${WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}`;
     
     const response = await fetch(url, {
       method: 'GET',
