@@ -1,9 +1,8 @@
 <script>
-  import { onMount } from 'svelte';
-  import { mapData, initializeData, lookupTables } from '$lib/stores/data.js';
-  import { filters, updateDateRange } from '$lib/stores/filters.js';
+  import { mapData, lookupTables } from '$lib/stores/data.js';
+  import { filters } from '$lib/stores/filters.js';
   import { mapState, sidebarState, filteredEvents } from '$lib/stores/map.js';
-  
+
   import MapContainer from '$lib/components/Map/MapContainer.svelte';
   import PersonTypeFilter from '$lib/components/Filters/PersonTypeFilter.svelte';
   import DateSlider from '$lib/components/Filters/DateSlider.svelte';
@@ -12,137 +11,11 @@
   import EventsList from '$lib/components/Sidebar/EventsList.svelte';
   import Histogram from '$lib/components/Timeline/Histogram.svelte';
 
-  let mounted = false;
-  let dataLoaded = false;
-  let loadingError = null;
-
-  onMount(async () => {
-    console.log('Page mounting, initializing data...');
-    
-    try {
-      // Initialize data first
-      await initializeData();
-      dataLoaded = true;
-      console.log('Data initialization complete');
-      console.log('Events loaded:', $mapData.METADATA?.Events?.length || 0);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      loadingError = error.message;
-    }
-    
-    mounted = true;
-    
-    // Initialize other components after data is loaded
-    if (dataLoaded) {
-      updateDateRangeFromData();
-      updateSliderBackground();
-      loadMarkerFromURL();
-    }
-  });
-
-  // Debug reactive statements
-  $: {
-    console.log('=== Page Debug ===');
-    console.log('mounted:', mounted);
-    console.log('dataLoaded:', dataLoaded);
-    console.log('loadingError:', loadingError);
-    console.log('mapData.METADATA keys:', Object.keys($mapData.METADATA || {}));
-    console.log('raw events count:', $mapData.METADATA?.Events?.length || 0);
-    if ($filteredEvents && typeof $filteredEvents.length === 'number') {
-        console.log('filteredEvents count:', $filteredEvents.length);
-        } else {
-        console.warn('filteredEvents not ready or not an array:', $filteredEvents);
-    }
-
-    console.log('sidebarState activeMarkers:', $sidebarState.activeMarkers?.length || 0);
-    console.log('current filters:', $filters);
-    console.log('==================');
-  }
-
-  function updateDateRangeFromData() {
-    // Get date range from actual data if available
-    const events = $mapData.METADATA?.Events || [];
-    if (events.length > 0) {
-      let minYear = 1600;
-      let maxYear = 1400;
-      
-      events.forEach(event => {
-        const eyear = parseInt(event.EYEAR);
-        const lyear = parseInt(event.LYEAR);
-        
-        if (!isNaN(eyear)) {
-          minYear = Math.min(minYear, eyear);
-          maxYear = Math.max(maxYear, eyear);
-        }
-        if (!isNaN(lyear)) {
-          minYear = Math.min(minYear, lyear);
-          maxYear = Math.max(maxYear, lyear);
-        }
-      });
-      
-      // Only update if we found valid years
-      if (minYear < maxYear) {
-        console.log('Setting date range from data:', minYear, '-', maxYear);
-        filters.update(f => ({
-          ...f,
-          dateRange: { min: minYear, max: maxYear }
-        }));
-      }
-    }
-  }
-
-  function updateSliderBackground() {
-    // Implementation for slider background updates
-    console.log('Slider background updated');
-    // This would typically update visual elements of the date slider
-  }
-
-  function loadMarkerFromURL() {
-    // Load specific marker if eventid is in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    let eventid = urlParams.get('eventid');
-    
-    if (eventid) {
-      eventid = eventid.startsWith('EV:') ? eventid : `EV:${eventid}`;
-      console.log('Loading marker for event:', eventid);
-      
-      // Find the event in the data
-      const events = $mapData.METADATA?.Events || [];
-      const targetEvent = events.find(event => event.EVID === eventid);
-      
-      if (targetEvent) {
-        console.log('Found target event:', targetEvent);
-        // Update map state to focus on this event
-        mapState.update(state => ({
-          ...state,
-          selectedMarker: targetEvent
-        }));
-        
-        // You might also want to update the sidebar to show this event
-        sidebarState.update(state => ({
-          ...state,
-          selectedEvent: targetEvent
-        }));
-      } else {
-        console.warn('Event not found:', eventid);
-      }
-    }
-  }
-
-  // Helper function to retry data loading
-  async function retryDataLoad() {
-    loadingError = null;
-    dataLoaded = false;
-    
-    try {
-      await initializeData();
-      dataLoaded = true;
-      updateDateRangeFromData();
-    } catch (error) {
-      console.error('Retry failed:', error);
-      loadingError = error.message;
-    }
-  }
+  // If you want hardcoded some UI state for design, you can set:
+  // let filters = {};
+  // let filteredEvents = [];
+  // let mapData = {};
+  // let sidebarState = {};
 </script>
 
 <svelte:head>
@@ -150,110 +23,72 @@
   <meta name="description" content="Interactive map of Renaissance music events and figures" />
 </svelte:head>
 
-{#if mounted}
-  {#if loadingError}
-    <!-- Error state -->
-    <div class="error-container">
-      <h2>Error Loading Data</h2>
-      <p>There was a problem loading the musical data:</p>
-      <p class="error-message">{loadingError}</p>
-      <button on:click={retryDataLoad} class="retry-button">
-        Retry Loading Data
-      </button>
-    </div>
-  {:else} 
-    <!-- Main application -->
-    <div class="container">
-      <!-- Search and Filters Row -->
-      <div class="filters-row">
-        <SearchBox />
-        <PersonTypeFilter />
-        <InstitutionFilter />
-      </div>
+<!-- NO loading logic, always render main UI! -->
+<div class="container">
+  <!-- Search and Filters Row -->
+  <div class="filters-row">
+    <SearchBox />
+    <PersonTypeFilter />
+    <InstitutionFilter />
+  </div>
 
-      <!-- Main Content Row -->
-      <div class="content-wrapper">
-        <div class="map-slider-container">
-          <MapContainer />
-          
-          <div class="slider-container">
-            <DateSlider />
-          </div>
-        </div>
+  <!-- Main Content Row -->
+  <div class="content-wrapper">
+    <div class="map-slider-container">
+      <MapContainer />
 
-        <!-- Sidebar -->
-        <div id="sidebar">
-          <EventsList />
-        </div>
-      </div>
-
-      <!-- Histogram with comprehensive debug info -->
-      <div class="histogram-container">
-        <div class="histogram-debug">
-          <h4>Histogram Debug Info</h4>
-          <div class="debug-grid">
-            <div>
-              <strong>Data Status:</strong><br>
-              • Data Loaded: {dataLoaded ? '✅ Yes' : '❌ No'}<br>
-              • Loading Error: {loadingError || 'None'}<br>
-              • Mounted: {mounted ? '✅ Yes' : '❌ No'}
-            </div>
-            <div>
-              <strong>Event Counts:</strong><br>
-              • Total Events in Data: {$mapData.METADATA?.Events?.length || 0}<br>
-              • Filtered Events: {$filteredEvents?.length || 0}<br>
-              • Active Markers: {$sidebarState.activeMarkers?.length || 0}
-            </div>
-            <div>
-              <strong>Filter Status:</strong><br>
-              • Show Composers: {$filters.showComposers ? '✅' : '❌'}<br>
-              • Show Musicians: {$filters.showMusicians ? '✅' : '❌'}<br>
-              • Show Non-Musicians: {$filters.showNonMusicians ? '✅' : '❌'}
-            </div>
-            <div>
-              <strong>Date Range:</strong><br>
-              • Min: {$filters.dateRange?.min || 'Not set'}<br>
-              • Max: {$filters.dateRange?.max || 'Not set'}<br>
-              • Search: "{$filters.searchText || 'None'}"
-            </div>
-          </div>
-          
-          {#if $filteredEvents?.length > 0}
-            <details class="sample-data">
-              <summary>Sample Event Data</summary>
-              <pre>{JSON.stringify($filteredEvents[0], null, 2)}</pre>
-            </details>
-          {/if}
-        </div>
-        
-        <Histogram />
+      <div class="slider-container">
+        <DateSlider />
       </div>
     </div>
-  {:else}
-    <!-- Loading state -->
-    <div class="loading-container">
-      <div class="loading-content">
-        <div class="loading-spinner"></div>
-        <h2>Loading Musical Renaissance Map...</h2>
-        <div class="loading-details">
-          <p>📊 Data loaded: {dataLoaded ? 'Yes' : 'No'}</p>
-          <p>🔧 Component mounted: {mounted ? 'Yes' : 'No'}</p>
-          <p>📁 Metadata keys: {Object.keys($mapData.METADATA || {}).join(', ') || 'None yet'}</p>
-          {#if $mapData.isLoading}
-            <p>⏳ Fetching data from Google Sheets...</p>
-          {/if}
-        </div>
-      </div>
-    </div>
-  {/if}
-{:else}
-  <!-- Initial mounting state -->
-  <div class="loading-container">
-    <div class="loading-content">
-      <h2>Initializing Application...</h2>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <EventsList />
     </div>
   </div>
-{/if}
+
+  <!-- Histogram with debug info -->
+  <div class="histogram-container">
+    <div class="histogram-debug">
+      <h4>Histogram Debug Info</h4>
+      <div class="debug-grid">
+        <div>
+          <strong>Data Status:</strong><br>
+          • Data Loaded: {'?'}<br>
+          • Loading Error: {'?'}<br>
+          • Mounted: {'?'}
+        </div>
+        <div>
+          <strong>Event Counts:</strong><br>
+          • Total Events in Data: {$mapData.METADATA?.Events?.length || 0}<br>
+          • Filtered Events: {$filteredEvents?.length || 0}<br>
+          • Active Markers: {$sidebarState.activeMarkers?.length || 0}
+        </div>
+        <div>
+          <strong>Filter Status:</strong><br>
+          • Show Composers: {$filters.showComposers ? '✅' : '❌'}<br>
+          • Show Musicians: {$filters.showMusicians ? '✅' : '❌'}<br>
+          • Show Non-Musicians: {$filters.showNonMusicians ? '✅' : '❌'}
+        </div>
+        <div>
+          <strong>Date Range:</strong><br>
+          • Min: {$filters.dateRange?.min || 'Not set'}<br>
+          • Max: {$filters.dateRange?.max || 'Not set'}<br>
+          • Search: "{$filters.searchText || 'None'}"
+        </div>
+      </div>
+
+      {#if $filteredEvents?.length > 0}
+        <details class="sample-data">
+          <summary>Sample Event Data</summary>
+          <pre>{JSON.stringify($filteredEvents[0], null, 2)}</pre>
+        </details>
+      {/if}
+    </div>
+    <Histogram />
+  </div>
+</div>
 
 <style>
   .container {
