@@ -1,4 +1,4 @@
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxSWAHnn58P63MF4t8bN2zDzE78r8vHqHqYJ56Y2aR6G8iO9-RwIMYEeb5wEO5RWwRn/exec';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxLyD9akm3kk9StOeG6SMMlyslp-103kzoqfTBWr1uMQtATiFz0XAmjleDgPZgWE9HC/exec';
 
 export async function fetchSheetData(sheetName) {
   try {
