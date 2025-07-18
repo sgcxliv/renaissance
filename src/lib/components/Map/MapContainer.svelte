@@ -134,7 +134,7 @@
     markerCluster.clearLayers();
 
     // Apply filters
-    const filteredEvents = applyFilters(
+    const filteredLocalEvents = applyFilters(
       allProcessedEvents, 
       currentFilters, 
       $lookupTables, 

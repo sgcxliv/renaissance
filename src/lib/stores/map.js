@@ -22,6 +22,7 @@ export const sidebarState = writable({
   selectedEvent: null
 });
 
+console.log("Inside map.js: mapData", mapData, "filters", filters, "lookupTables", lookupTables);
 /**
  * Derived store that applies all filters to events
  */
