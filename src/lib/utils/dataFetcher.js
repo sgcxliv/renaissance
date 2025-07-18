@@ -1,4 +1,4 @@
-const WEBAPP_URL = 'https://script.google.com/a/macros/stanford.edu/s/AKfycbypdmnFDUbOudVBC03fD_bhgL14uXgt_TcAf6SPvEY2Ze0hN-dFu5vKvJLZUTrSKpvo1g/exec';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwgg2GZbKDuMxKH7g5kdbDMYvFxI20UyusSy-y8V0eLQVy9IEInKBjyJG0a6qLiE7nq/exec';
 
 export async function fetchSheetData(sheetName) {
   try {
