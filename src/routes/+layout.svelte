@@ -28,7 +28,7 @@
   });
 </script>
 
-DEBUG BEFORE IF BLOCKS
+//DEBUG BEFORE IF BLOCKS
 
 {#if $isLoading}
   <div class="loading">Loading...</div>
