@@ -1,64 +1,32 @@
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwgg2GZbKDuMxKH7g5kdbDMYvFxI20UyusSy-y8V0eLQVy9IEInKBjyJG0a6qLiE7nq/exec';
+import Papa from 'papaparse';
+
+// Map each sheet name to its CSV URL (fill these in as you publish each tab)
+const CSV_URLS = {
+  Events:         "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=2002075686&single=true&output=csv",
+  Bio_Composers:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=576281292&single=true&output=csv",
+  Bio_Musicians:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=50716405&single=true&output=csv",
+  Bio_Nonmusicians:"https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=1177910087&single=true&output=csv",
+  Locations:      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=1472256039&single=true&output=csv",
+  Institutions:   "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=844808436&single=true&output=csv",
+  Doc_Entries:    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=1338879625&single=true&output=csv",
+  Archival_Docs:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=1869779751&single=true&output=csv",
+  Bibliography:   "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=1074180020&single=true&output=csv",
+  Headers:        "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=1188976420&single=true&output=csv",
+  Occasions:      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=720598622&single=true&output=csv"
+};
 
 export async function fetchSheetData(sheetName) {
-  try {
-    console.log(`Fetching data for sheet: ${sheetName}`);
-    
-    const url = `${WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+  const url = CSV_URLS[sheetName];
+  if (!url) throw new Error(`No CSV URL for sheet: ${sheetName}`);
+  const response = await fetch(url);
+  const csv = await response.text();
+
+  return new Promise((resolve, reject) => {
+    Papa.parse(csv, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => resolve(results.data),
+      error: reject
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    // Check if the response contains an error
-    if (data.error) {
-      throw new Error(`Server error: ${data.message || data.error}`);
-    }
-
-    console.log(`Successfully fetched ${data.length} records for ${sheetName}`);
-    return data;
-    
-  } catch (error) {
-    console.error(`Error fetching ${sheetName}:`, error);
-    throw new Error(`Failed to fetch ${sheetName}: ${error.message}`);
-  }
-}
-
-export async function fetchAllSheets() {
-  const sheets = [
-    'Events', 
-    'Locations', 
-    'Bio_Composers', 
-    'Bio_Musicians', 
-    'Bio_Nonmusicians', 
-    'Institutions', 
-    'Headers',
-    'Doc_Entries',
-    'Occasions',
-    'Archival_Docs',
-    'Bibliography'
-  ];
-  
-  const results = {};
-  
-  for (const sheet of sheets) {
-    try {
-      results[sheet] = await fetchSheetData(sheet);
-    } catch (error) {
-      console.error(`Failed to fetch ${sheet}:`, error);
-      results[sheet] = [];
-    }
-  }
-  
-  return results;
+  });
 }
