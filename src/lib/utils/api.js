@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/stanford.edu/s/AKfycbzSaTTclxO-sOMOqPUgJkCeFWyMqHyhCvh_EjQd6UohLnBzUbh8l0-Eozt2mLa-CoDwow/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgg2GZbKDuMxKH7g5kdbDMYvFxI20UyusSy-y8V0eLQVy9IEInKBjyJG0a6qLiE7nq/exec';
 
 // Fetch data from Google Apps Script
 export async function fetchSheetData(sheetName) {
