@@ -4,6 +4,7 @@
   import { filters, updateDateRange } from '$lib/stores/filters.js';
   import { mapState, sidebarState, filteredEvents } from '$lib/stores/map.js';
   
+  import Navbar from '$lib/components/Navigation/Navbar.svelte';
   import MapContainer from '$lib/components/Map/MapContainer.svelte';
   import PersonTypeFilter from '$lib/components/Filters/PersonTypeFilter.svelte';
   import DateSlider from '$lib/components/Filters/DateSlider.svelte';
@@ -15,6 +16,18 @@
   let mounted = false;
   let dataLoaded = false;
   let loadingError = null;
+
+  // Dropdown states for the filter sections
+  let dropdownStates = {
+    composers: false,
+    musicians: false,
+    nonmusicians: false
+  };
+
+  function toggleDropdown(category) {
+    dropdownStates[category] = !dropdownStates[category];
+    dropdownStates = { ...dropdownStates }; // Trigger reactivity
+  }
 
   onMount(async () => {
     console.log('Page mounting, initializing data...');
@@ -150,6 +163,8 @@
   <meta name="description" content="Interactive map of Renaissance music events and figures" />
 </svelte:head>
 
+<Navbar />
+
 {#if mounted}
   {#if loadingError}
     <!-- Error state -->
@@ -162,71 +177,144 @@
       </button>
     </div>
   {:else if dataLoaded}
-    <!-- Main application -->
-    <div class="container">
-      <!-- Search and Filters Row -->
-      <div class="filters-row">
-        <SearchBox />
-        <PersonTypeFilter />
-        <InstitutionFilter />
+    <!-- Main landing page -->
+    <div class="landing-container">
+      <!-- Banner Section -->
+      <div class="banner-section">
+        <div class="banner-content">
+          <h2>Banner: about the project</h2>
+          <p>This interactive map displays historical events related to musicians, composers, and other figures in music history from 1400-1600.</p>
+        </div>
       </div>
 
-      <!-- Main Content Row -->
-      <div class="content-wrapper">
-        <div class="map-slider-container">
-          <MapContainer />
-          
-          <div class="slider-container">
+      <!-- Main Content Grid -->
+      <div class="main-grid">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+          <!-- Search Bar -->
+          <div class="search-section">
+            <SearchBox />
+          </div>
+
+          <!-- About/Source Tabs -->
+          <div class="info-tabs">
+            <div class="tab-buttons">
+              <button class="tab-btn active">About</button>
+              <button class="tab-btn">Source</button>
+            </div>
+            <div class="tab-note">
+              Two tabs: source has images of primary-source documents
+            </div>
+          </div>
+
+          <!-- Filter Dropdowns -->
+          <div class="filter-tabs">
+            <div class="tab-section">
+              <div class="tab-header" on:click={() => toggleDropdown('composers')}>
+                Composers >
+              </div>
+              <div class="tab-content dropdown-content" class:open={dropdownStates.composers}>
+                <div class="name-item">Pierre de la Rue</div>
+                <div class="name-item">Josquin</div>
+                <div class="ellipsis">... see more</div>
+              </div>
+            </div>
+            
+            <div class="tab-section">
+              <div class="tab-header" on:click={() => toggleDropdown('musicians')}>
+                Musicians >
+              </div>
+              <div class="tab-content dropdown-content" class:open={dropdownStates.musicians}>
+                <div class="ellipsis">...</div>
+              </div>
+            </div>
+            
+            <div class="tab-section">
+              <div class="tab-header" on:click={() => toggleDropdown('nonmusicians')}>
+                Non-musicians >
+              </div>
+              <div class="tab-content dropdown-content" class:open={dropdownStates.nonmusicians}>
+                <div class="ellipsis">...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pop-up Info -->
+          <div class="popup-section">
+            <div class="popup-header">Pop up: Name of Relevant Thing/Source</div>
+          </div>
+
+          <!-- Media Sections -->
+          <div class="media-grid">
+            <div class="picture-section">
+              <h4>Picture of figure/video</h4>
+              <p>Clicking the image/video enlarges it to full-screen</p>
+            </div>
+            
+            <div class="short-blurb">
+              <p><em>Short Blurb about it, Important things are sectioned under people/places/events and also have their own separate page</em></p>
+              <div class="story-link">link to full story map page if there is one</div>
+            </div>
+          </div>
+
+          <!-- Audio Element -->
+          <div class="audio-section">
+            <h4>Audio element</h4>
+            <div class="audio-controls">
+              <button class="audio-btn">◀</button>
+              <button class="audio-btn play-btn">▶</button>
+              <button class="audio-btn">▶▶</button>
+            </div>
+          </div>
+
+          <!-- Related Events -->
+          <div class="related-section">
+            <h4>Related Events/Suggestions:</h4>
+            <div class="suggestions">
+              <div class="suggestion-category">
+                <strong>Want to learn more:</strong>
+                <div class="suggestion-item">Person 1 (Direct link to pop up)</div>
+                <div class="suggestion-item">Event 1 (Direct link to pop up)</div>
+                <div class="suggestion-item">Place 1 (Direct link to pop up)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Map Area -->
+        <div class="map-area">
+          <!-- Metadata Bar -->
+          <div class="metadata-bar">
+            <span class="metadata-text">Metadata: # Events visible, time period selected</span>
+            <div class="zoom-controls">
+              <span>Zoom in<br>out/map<br>controls</span>
+            </div>
+          </div>
+
+          <!-- Map Container -->
+          <div class="map-wrapper">
+            <MapContainer />
+            <!-- Current search note -->
+            <div class="search-note">
+              *current search bar only does a direct lookup (eg. France must mention the literal string "France", but in theory should return stuff related to all French cities, events, music, people, etc.
+            </div>
+          </div>
+
+          <!-- Timeline Slider -->
+          <div class="timeline-wrapper">
             <DateSlider />
           </div>
-        </div>
 
-        <!-- Sidebar -->
-        <div id="sidebar">
-          <EventsList />
-        </div>
-      </div>
-
-      <!-- Histogram with comprehensive debug info -->
-      <div class="histogram-container">
-        <div class="histogram-debug">
-          <h4>Histogram Debug Info</h4>
-          <div class="debug-grid">
-            <div>
-              <strong>Data Status:</strong><br>
-              • Data Loaded: {dataLoaded ? '✅ Yes' : '❌ No'}<br>
-              • Loading Error: {loadingError || 'None'}<br>
-              • Mounted: {mounted ? '✅ Yes' : '❌ No'}
-            </div>
-            <div>
-              <strong>Event Counts:</strong><br>
-              • Total Events in Data: {$mapData.METADATA?.Events?.length || 0}<br>
-              • Filtered Events: {$filteredEvents?.length || 0}<br>
-              • Active Markers: {$sidebarState.activeMarkers?.length || 0}
-            </div>
-            <div>
-              <strong>Filter Status:</strong><br>
-              • Show Composers: {$filters.showComposers ? '✅' : '❌'}<br>
-              • Show Musicians: {$filters.showMusicians ? '✅' : '❌'}<br>
-              • Show Non-Musicians: {$filters.showNonMusicians ? '✅' : '❌'}
-            </div>
-            <div>
-              <strong>Date Range:</strong><br>
-              • Min: {$filters.dateRange?.min || 'Not set'}<br>
-              • Max: {$filters.dateRange?.max || 'Not set'}<br>
-              • Search: "{$filters.searchText || 'None'}"
+          <!-- Map Legend -->
+          <div class="legend-wrapper">
+            <h4>General Map legend:</h4>
+            <div class="legend-items">
+              <div class="legend-item">Transparency = Confidence in event</div>
+              <div class="legend-item">Color = Composer/Musician/Non-Musician</div>
+              <div class="legend-item">Shape = Political/Ecclesiastical/Other</div>
             </div>
           </div>
-          
-          {#if $filteredEvents?.length > 0}
-            <details class="sample-data">
-              <summary>Sample Event Data</summary>
-              <pre>{JSON.stringify($filteredEvents[0], null, 2)}</pre>
-            </details>
-          {/if}
         </div>
-        
-        <Histogram />
       </div>
     </div>
   {:else}
@@ -256,102 +344,386 @@
 {/if}
 
 <style>
-  .container {
+  /* Override layout styles for landing page */
+  :global(.wrapper) {
+    position: static !important;
+    height: auto !important;
+  }
+
+  :global(.map-container),
+  :global(.filters-container),
+  :global(.slider-container) {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: auto !important;
+    transform: none !important;
+  }
+
+  :global(body) {
+    font-family: 'Times New Roman', serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f7f4;
+    height: 100vh;
+  }
+
+  :global(html) {
+    height: 100vh;
+  }
+
+  /* Landing Page Styles */
+  .landing-container {
+    background-color: #f5f5f0;
+    height: calc(100vh - 80px);
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
   }
 
-  .filters-row {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem 0;
-    align-items: center;
-    flex-wrap: wrap;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+  .banner-section {
+    background-color: #f0ede5;
+    border: 2px solid #8b7355;
+    margin: 1rem;
+    padding: 1.5rem;
   }
 
-  .content-wrapper {
-    display: flex;
-    width: 100%;
-    height: calc(100vh - 350px);
+  .banner-content h2 {
+    margin: 0 0 1rem 0;
+    color: #2c2c2c;
+    font-size: 1.3rem;
   }
 
-  .map-slider-container {
-    position: relative;
-    width: 75%;
-    height: 100%;
-  }
-
-  .slider-container {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    z-index: 2;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  #sidebar {
-    width: 25%;
-    height: 100%;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
-    overflow-y: auto;
-    border-left: 1px solid #dee2e6;
-  }
-
-  .histogram-container {
-    width: 100%;
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border-top: 1px solid #dee2e6;
-  }
-
-  .histogram-debug {
-    background: #f0f8ff;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  .histogram-debug h4 {
-    margin: 0 0 10px 0;
+  .banner-content p {
+    margin: 0;
+    line-height: 1.6;
     color: #333;
   }
 
-  .debug-grid {
+  .main-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    font-size: 14px;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+    margin: 1rem;
+    flex: 1;
+    min-height: 0;
   }
 
-  .sample-data {
-    margin-top: 10px;
+  /* Left Sidebar Styles */
+  .left-sidebar {
+    background-color: #f0ede5;
+    border: 2px solid #8b7355;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  .sample-data summary {
-    cursor: pointer;
+  .search-section {
+    background-color: #d4c4a0;
+    padding: 0.75rem;
+    border: 1px solid #8b7355;
+    border-radius: 4px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tab-section {
+    background-color: white;
+    border: 1px solid #8b7355;
+    border-radius: 4px;
+  }
+
+  .tab-header {
+    background-color: #e8dcc0;
+    padding: 0.75rem;
     font-weight: bold;
+    color: #2c2c2c;
+    border-bottom: 1px solid #8b7355;
+    cursor: pointer;
   }
 
-  .sample-data pre {
-    background: #f9f9f9;
-    padding: 10px;
-    overflow: auto;
-    font-size: 11px;
-    margin-top: 5px;
+  .tab-content {
+    padding: 0.75rem;
   }
 
+  .dropdown-content {
+    display: none;
+    transition: all 0.3s ease;
+  }
+
+  .dropdown-content.open {
+    display: block;
+  }
+
+  .tab-header:hover {
+    background-color: #d4c4a0;
+  }
+
+  .name-item {
+    margin-bottom: 0.25rem;
+    color: #333;
+    font-size: 0.9rem;
+  }
+
+  .ellipsis {
+    color: #666;
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  .info-tabs {
+    background-color: white;
+    border: 1px solid #8b7355;
+    border-radius: 4px;
+  }
+
+  .tab-buttons {
+    display: flex;
+    border-bottom: 1px solid #8b7355;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    background-color: #f5f5f0;
+    cursor: pointer;
+    border-right: 1px solid #8b7355;
+  }
+
+  .tab-btn:last-child {
+    border-right: none;
+  }
+
+  .tab-btn.active {
+    background-color: #8b4513;
+    color: white;
+  }
+
+  .tab-note {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  .popup-section {
+    background-color: #e8dcc0;
+    border: 1px solid #8b7355;
+    padding: 0.75rem;
+    border-radius: 4px;
+  }
+
+  .popup-header {
+    font-weight: bold;
+    color: #2c2c2c;
+    text-align: center;
+  }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .picture-section {
+    background-color: white;
+    border: 1px solid #8b7355;
+    padding: 0.75rem;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .picture-section h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2c2c2c;
+    font-size: 1rem;
+  }
+
+  .picture-section p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.4;
+  }
+
+  .short-blurb {
+    background-color: white;
+    border: 1px solid #8b7355;
+    padding: 0.75rem;
+    border-radius: 4px;
+  }
+
+  .short-blurb p {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #333;
+  }
+
+  .story-link {
+    font-size: 0.8rem;
+    color: #0066cc;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .audio-section {
+    background-color: white;
+    border: 1px solid #8b7355;
+    padding: 0.75rem;
+    border-radius: 4px;
+  }
+
+  .audio-section h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2c2c2c;
+    font-size: 1rem;
+  }
+
+  .audio-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    background-color: #8b4513;
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+
+  .audio-btn {
+    background: white;
+    border: 1px solid #333;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+
+  .play-btn {
+    background-color: #f0f0f0;
+  }
+
+  .related-section {
+    background-color: white;
+    border: 1px solid #8b7355;
+    padding: 0.75rem;
+    border-radius: 4px;
+  }
+
+  .related-section h4 {
+    margin: 0 0 0.75rem 0;
+    color: #2c2c2c;
+    font-size: 1rem;
+  }
+
+  .suggestion-category {
+    margin-bottom: 0.5rem;
+  }
+
+  .suggestion-item {
+    margin-left: 1rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: #0066cc;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* Map Area Styles */
+  .map-area {
+    background-color: #e8dcc0;
+    border: 2px solid #8b7355;
+    display: flex;
+    flex-direction: column;
+    overflow: visible; /* Allow child elements to extend beyond */
+  }
+
+  .metadata-bar {
+    background-color: #d4c4a0;
+    padding: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #8b7355;
+  }
+
+  .metadata-text {
+    font-weight: bold;
+    color: #2c2c2c;
+  }
+
+  .zoom-controls {
+    background-color: white;
+    border: 1px solid #333;
+    padding: 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .map-wrapper {
+    position: relative;
+    flex: 1;
+    min-height: 0; /* Allow flex to shrink */
+    height: 70vh; /* Fixed height to extend beyond container */
+    overflow: visible; /* Allow map to extend outside */
+  }
+
+  .search-note {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 0.75rem;
+    border: 1px solid #8b7355;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    max-width: 300px;
+    z-index: 1000;
+  }
+
+  .timeline-wrapper {
+    padding: 0.75rem;
+    background-color: #f0ede5;
+    border-top: 1px solid #8b7355;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10; /* Ensure timeline appears above extended map */
+  }
+
+  .legend-wrapper {
+    background-color: #f0ede5;
+    padding: 0.75rem;
+    border-top: 1px solid #8b7355;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10; /* Ensure legend appears above extended map */
+  }
+
+  .legend-wrapper h4 {
+    margin: 0 0 0.75rem 0;
+    color: #2c2c2c;
+    font-size: 1rem;
+  }
+
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .legend-item {
+    font-size: 0.9rem;
+    color: #333;
+  }
+
+  /* Loading and Error States */
   .loading-container {
     display: flex;
     justify-content: center;
@@ -434,38 +806,41 @@
     background: #0056b3;
   }
 
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .content-wrapper {
-      flex-direction: column;
-      height: auto;
-    }
-    
-    .map-slider-container {
-      width: 100%;
-      height: 60vh;
-      min-height: 300px;
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .main-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
     }
 
-    #sidebar {
-      width: 100%;
-      height: 300px;
-      border-left: none;
-      border-top: 1px solid #dee2e6;
+    .media-grid {
+      grid-template-columns: 1fr;
     }
-    
-    .filters-row {
+  }
+
+  @media (max-width: 768px) {
+    .main-grid {
+      margin: 0.5rem;
+    }
+
+    .banner-section {
+      margin: 0.5rem;
+      padding: 1rem;
+    }
+
+    .left-sidebar {
+      padding: 0.75rem;
+    }
+
+    .search-note {
+      position: static;
+      margin-top: 1rem;
+      max-width: none;
+    }
+
+    .legend-items {
       flex-direction: column;
-      align-items: stretch;
       gap: 0.5rem;
     }
-
-    .slider-container {
-      position: static;
-      transform: none;
-      width: 100%;
-      margin-top: 20px;
-      background: white;
-    }
-}
+  }
 </style>

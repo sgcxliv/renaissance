@@ -25,18 +25,14 @@ export const sidebarState = writable({
 console.log("Inside map.js: mapData", mapData, "filters", filters, "lookupTables", lookupTables);
 
 export const filteredEvents = derived(
-  mapData,
-  $mapData => $mapData.METADATA?.Events || []
+  [mapData, filters, lookupTables],
+  ([$mapData, $filters, $lookupTables]) => {
+    const rawEvents = $mapData.METADATA?.Events || [];
+    if (!Array.isArray(rawEvents)) return [];
+    if (!$lookupTables || Object.keys($lookupTables).length === 0) return [];
+    return applyFilters(rawEvents, $filters, $lookupTables, {});
+  }
 );
-// If you want filtering, uncomment and fix this block with correct fieldnames!
-// export const filteredEvents = derived(
-//   [mapData, filters, lookupTables],
-//   ([$mapData, $filters, $lookupTables]) => {
-//     const rawEvents = $mapData.METADATA?.Events || [];
-//     if (!Array.isArray(rawEvents)) return [];
-//     return applyFilters(rawEvents, $filters, $lookupTables, {});
-//   }
-// );
 
 /**
  * Events with location data for map display

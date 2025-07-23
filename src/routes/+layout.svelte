@@ -102,18 +102,7 @@
   <header></header>
 
   <main class="page-content">
-    <div class="wrapper">
-      <div class="filters-container">
-        <slot name="filters" />
-      </div>
-      <div class="map-container">
-        <slot name="map" />
-      </div>
-      <div class="slider-container">
-        <slot name="slider" />
-      </div>
-      <slot />
-    </div>
+    <slot />
   </main>
 
   <footer></footer>
@@ -133,52 +122,6 @@
     color: red;
   }
 
-  .wrapper {
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 100px);
-  }
-
-  .map-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
-  }
-  #map {
-    pointer-events: auto;
-  }
-  .filters-container {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.98);
-    border-radius: 6px;
-    padding: 12px 18px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.09);
-    min-width: 220px;
-    user-select: auto;
-    pointer-events: auto;
-  }
-  .slider-container {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    z-index: 2;
-  }
-  @media (max-width: 768px) {
-    .filters-container { top: 10px; left: 5px; right: 5px; min-width: 0; width: calc(100% - 10px); padding: 8px 6px; }
-    .slider-container { width: 98%; }
-  }
-
-  /* New style for the map container */
-  .map-container {
-    height: 40vh; /* 40% of the viewport height */
-  }
+  /* Remove the wrapper and container styles that were causing conflicts */
+  /* Pages now control their own layout */
 </style>

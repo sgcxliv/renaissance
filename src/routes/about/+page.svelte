@@ -1,13 +1,130 @@
+<script>
+  import Navbar from '$lib/components/Navigation/Navbar.svelte';
+</script>
+
 <svelte:head>
-    <title>About - Historical Music Events</title>
+    <title>About - Mapping the Musical Renaissance</title>
 </svelte:head>
 
-<div class="about-page">
-    <h1>About This Project</h1>
+<Navbar />
+
+<main class="page-content">
+  <div class="about-container">
+    <h1>About Mapping the Musical Renaissance</h1>
     
-    <section>
-        <h2>Overview</h2>
-        <p>
+    <section class="about-section">
+      <h2>Project Overview</h2>
+      <p>
+        Mapping the Musical Renaissance is a digital humanities project that visualizes the geographic 
+        and temporal dimensions of Renaissance music culture across Europe. Through interactive maps 
+        and story maps, we explore the movements of musicians, the establishment of musical institutions, 
+        and the spread of musical innovations during the 15th and 16th centuries.
+      </p>
+    </section>
+    
+    <section class="about-section">
+      <h2>Methodology</h2>
+      <p>
+        Our research draws from historical records, archival sources, and musicological scholarship 
+        to create a comprehensive database of musical events, people, and places. Each data point 
+        is carefully verified and includes information about source reliability and historical certainty.
+      </p>
+    </section>
+    
+    <section class="about-section">
+      <h2>Data Sources</h2>
+      <p>
+        The project incorporates data from various historical archives, musical manuscripts, 
+        biographical records, and scholarly publications. We prioritize primary sources while 
+        acknowledging gaps and uncertainties in the historical record.
+      </p>
+    </section>
+    
+    <section class="about-section">
+      <h2>Team</h2>
+      <p>
+        This project is a collaboration between musicologists, digital humanities scholars, 
+        and data visualization specialists. [Team member details would go here]
+      </p>
+    </section>
+    
+    <section class="about-section">
+      <h2>Technical Implementation</h2>
+      <p>
+        The platform is built using modern web technologies including Svelte, Leaflet for mapping, 
+        and responsive design principles to ensure accessibility across devices.
+      </p>
+    </section>
+  </div>
+</main>
+
+<style>
+  .page-content {
+    min-height: calc(100vh - 80px);
+    background-color: #f9f7f4;
+    padding: 2rem;
+    font-family: 'Times New Roman', serif;
+  }
+  
+  .about-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #f0ede5;
+    border: 2px solid #8b7355;
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #2c2c2c;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    border-bottom: 2px solid #8b7355;
+    padding-bottom: 1rem;
+  }
+  
+  .about-section {
+    margin-bottom: 2rem;
+  }
+  
+  .about-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  h2 {
+    color: #2c2c2c;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    border-left: 4px solid #8b7355;
+    padding-left: 1rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 1rem;
+    text-align: justify;
+  }
+  
+  @media (max-width: 768px) {
+    .page-content {
+      padding: 1rem;
+    }
+    
+    .about-container {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+    }
+    
+    h2 {
+      font-size: 1.1rem;
+    }
+  }
+</style>
             This interactive map displays historical events related to musicians, composers,
             and other figures in music history from 1400-1600.
         </p>

@@ -222,8 +222,6 @@
         return;
       }
       const coordinates = [coordsArray[0], coordsArray[1]];
-      // Log marker creation
-      console.log('ADDING MARKER for', event.ID, 'at', coordinates, '->', event.LOCID);
 
       // Actually create marker (use markerCluster if you use it)
       const marker = L.marker(coordinates);
@@ -315,7 +313,7 @@
 <style>
   #map {
     flex: 3;
-    height: 60vh;
+    height: 80vh;
     min-height: 300px;
     border: 1px solid #ccc;
     border-radius: 4px;
