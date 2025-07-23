@@ -7,13 +7,6 @@
     { key: 'showMusicians', label: 'Musicians', color: '#23ed5c' },
     { key: 'showNonMusicians', label: 'Non-musicians', color: '#fde725' }
   ];
-
-  function handleCheckboxChange(key, event) {
-    filters.update(f => ({
-      ...f,
-      [key]: event.target.checked
-    }));
-  }
 </script>
 
 <div class="checkbox-container">
@@ -22,8 +15,7 @@
       <input 
         type="checkbox" 
         id="{type.key}-select"
-        checked={$filters[type.key]}
-        on:change={(e) => handleCheckboxChange(type.key, e)}
+        bind:checked={$filters[type.key]}
       />
       <label for="{type.key}-select">
         <span class="color-sample" style="background-color: {type.color};"></span>
@@ -38,8 +30,7 @@
     <input 
       type="checkbox" 
       id="certainty-select"
-      checked={$filters.showCertainty}
-      on:change={(e) => handleCheckboxChange('showCertainty', e)}
+      bind:checked={$filters.showCertainty}
     />
     <label for="certainty-select">
       Show only certain dates and locations

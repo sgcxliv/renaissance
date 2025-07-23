@@ -11,31 +11,50 @@
   let map;
   let markerCluster;
   let allProcessedEvents = [];
+  let failedEvents = [];
 
-  // Reactive statements
+  // Utility: filter events to only those visible in map viewport
+  function filterEventsInView(events, map) {
+    if (!map) return [];
+    const bounds = map.getBounds();
+    return events.filter(event => {
+      if (!event.coordinates) return false;
+      const [lat, lng] = Array.isArray(event.coordinates)
+        ? event.coordinates
+        : [event.coordinates.lat, event.coordinates.lng];
+      return bounds.contains(L.latLng(lat, lng));
+    });
+  }
+
+  // Reactive event processing
   $: if (map && $mapData.METADATA.Events && $lookupTables && $headerIndex) {
     processAndDisplayEvents();
   }
 
+  // Update markers when filters or events change
   $: if (map && markerCluster && allProcessedEvents.length > 0) {
     filterAndUpdateMarkers($filters);
   }
 
   onMount(() => {
     initializeMap();
-  });
 
-  onDestroy(() => {
-    if (map) {
-      map.remove();
-    }
+    const resizeHandler = () => {
+      if (map) map.invalidateSize();
+    };
+    window.addEventListener('resize', resizeHandler);
+
+    onDestroy(() => {
+      window.removeEventListener('resize', resizeHandler);
+      if (map) map.remove();
+    });
   });
 
   function initializeMap() {
     if (!mapElement) return;
 
-    map = L.map(mapElement, { 
-      preferCanvas: true 
+    map = L.map(mapElement, {
+      preferCanvas: true
     }).setView([47, 9], 5);
 
     map.options.minZoom = 4;
@@ -56,12 +75,12 @@
       iconCreateFunction: function(cluster) {
         const markers = cluster.getAllChildMarkers();
         const clusterColor = getClusterColor(markers);
-        
+
         if (markers.length <= 1) {
-          return L.divIcon({ 
-            html: '', 
-            className: 'hidden-cluster', 
-            iconSize: L.point(0, 0) 
+          return L.divIcon({
+            html: '',
+            className: 'hidden-cluster',
+            iconSize: L.point(0, 0)
           });
         }
 
@@ -77,8 +96,8 @@
               color: white;
               font-size: 14px;
               font-weight: bold;
-              background: radial-gradient(circle, 
-                ${clusterColor} 20%, 
+              background: radial-gradient(circle,
+                ${clusterColor} 20%,
                 rgba(255, 255, 255, 0.1) 80%);
               box-shadow: 0 0 10px rgba(0,0,0,0.3);
             ">
@@ -93,7 +112,7 @@
 
     map.addLayer(markerCluster);
 
-    // Add event listeners
+    // Event listeners
     map.on('moveend zoomend', () => {
       updateMapBounds();
       filterAndUpdateMarkers($filters);
@@ -109,7 +128,7 @@
       updateSidebarWithClusterMarkers(clusterMarkers);
     });
 
-    // Update store
+    // Update store to mark map as ready
     mapState.update(state => ({
       ...state,
       ready: true
@@ -117,14 +136,50 @@
   }
 
   function processAndDisplayEvents() {
-    const events = $mapData.METADATA.Events || [];
-    
-    allProcessedEvents = events
-      .map(event => processEventForDisplay(event, $lookupTables, $headerIndex))
-      .filter(Boolean); // Remove null events
+    // Add these logs at the top:
+    console.log("lookupTables.Locations keys:", Object.keys($lookupTables.Locations || {}));
+    console.log("lookupTables.Bio_Composers keys:", Object.keys($lookupTables.Bio_Composers || {}));
+    console.log("lookupTables.Bio_Musicians keys:", Object.keys($lookupTables.Bio_Musicians || {}));
+    console.log("lookupTables.Bio_Nonmusicians keys:", Object.keys($lookupTables.Bio_Nonmusicians || {}));
 
+    const events = $mapData.METADATA.Events || [];
+    console.log("First event LOCID:", events[0]?.LOCID, "BIOID:", events[0]?.BIOID);
+    console.log("Locations has key?", $lookupTables.Locations?.[events[0]?.LOCID]);
+    console.log("Bio_Musicians has key?", $lookupTables.Bio_Musicians?.[events[0]?.BIOID]);
+
+    // Use .reduce to track both successful and failed events
+    const { processed, failed } = events.reduce(
+      (acc, event) => {
+        const result = processEventForDisplay(event, $lookupTables, $headerIndex);
+        if (result !== null && result !== undefined) {
+          acc.processed.push(result);
+        } else {
+          acc.failed.push(event);
+        }
+        return acc;
+      },
+      { processed: [], failed: [] }
+    );
+    allProcessedEvents = processed;
+    failedEvents = failed;
     totalMarkers.set(allProcessedEvents.length);
     console.log(`Processed ${allProcessedEvents.length} events for display`);
+
+    if (failedEvents.length) {
+      console.warn('Failed to process events:', failedEvents);
+    }
+
+    // ==== MOVED DEBUGGING LOGS HERE ====
+    console.log('SAMPLE processed event:', allProcessedEvents[0]);
+    if (allProcessedEvents[0]) {
+      // Try multiple variants of ID as fallback
+      const locationId =
+        allProcessedEvents[0].LOCID ||
+        allProcessedEvents[0].locationId ||
+        allProcessedEvents[0].locid;
+      console.log('SAMPLE location ID from event:', locationId);
+      console.log('SAMPLE location lookup:', $lookupTables.Locations?.[locationId]);
+    }
   }
 
   function filterAndUpdateMarkers(currentFilters) {
@@ -133,32 +188,46 @@
     // Clear existing markers
     markerCluster.clearLayers();
 
-    // Apply filters
-    const filteredLocalEvents = applyFilters(
-      allProcessedEvents, 
-      currentFilters, 
-      $lookupTables, 
+    // Step 1: Filter by user filters (checkboxes, search, certainty...)
+    let filteredEvents = applyFilters(
+      allProcessedEvents,
+      currentFilters,
+      $lookupTables,
       $headerIndex
     );
 
-    // Create markers for filtered events
+    // Step 2: Further filter to only events visible in current map bounds
+    filteredEvents = filterEventsInView(filteredEvents, map);
+
+    // Optional: Further cap at max 300 at a time for performance/testing
+    // filteredEvents = filteredEvents.slice(0, 300);
+
+    // Step 3: Now create markers for just these items
     const newMarkers = [];
-    
+
     filteredEvents.forEach(event => {
-      if (!event.coordinates) return;
+      const locInfo = $lookupTables.Locations?.[event.LOCID];
+      if (!locInfo) {
+        console.error('Missing location for LOCID', event.LOCID, 'Event:', event);
+        return;
+      }
+      const coordsString = locInfo.Coordinates || locInfo.COORD;
+      if (!coordsString) {
+        console.error('Missing coordinates in location row:', locInfo, 'LOCID:', event.LOCID);
+        return;
+      }
+      const coordsArray = coordsString.split(',').map(Number);
+      if (coordsArray.length !== 2 || coordsArray.some(isNaN)) {
+        console.error('Invalid coords:', coordsString, coordsArray, 'Event:', event);
+        return;
+      }
+      const coordinates = [coordsArray[0], coordsArray[1]];
+      // Log marker creation
+      console.log('ADDING MARKER for', event.ID, 'at', coordinates, '->', event.LOCID);
 
-      const marker = createMarker(event, event.coordinates);
-      
-      // Create popup content
-      const popupContent = createPopupContent(event, $lookupTables, $headerIndex);
-      marker.bindPopup(popupContent);
-
-      // Store event data on marker
-      marker.eventData = event;
-      marker.options.personID = event.BIOID;
-      marker.options.eventId = event.EVID;
-
-      newMarkers.push(marker);
+      // Actually create marker (use markerCluster if you use it)
+      const marker = L.marker(coordinates);
+      markerCluster.addLayer(marker); // or marker.addTo(map) if not using clusters
     });
 
     // Add markers to cluster
@@ -175,7 +244,7 @@
 
   function updateMapBounds() {
     if (!map) return;
-    
+
     const bounds = map.getBounds();
     mapState.update(state => ({
       ...state,
@@ -192,7 +261,7 @@
     const events = clusterMarkers
       .map(marker => marker.eventData)
       .filter(Boolean);
-    
+
     sidebarState.update(state => ({
       ...state,
       activeMarkers: events
@@ -209,7 +278,7 @@
     const events = visibleMarkers
       .map(marker => marker.eventData)
       .filter(Boolean);
-    
+
     sidebarState.update(state => ({
       ...state,
       activeMarkers: events
@@ -220,7 +289,7 @@
   if (typeof window !== 'undefined') {
     window.sharePoint = function(eventid) {
       const shareURL = `${window.location.origin}/?eventid=${eventid}`;
-      
+
       if (navigator.clipboard) {
         navigator.clipboard.writeText(shareURL).then(() => {
           console.log('Link copied to clipboard');
@@ -231,6 +300,14 @@
       }
     };
   }
+
+  function getLocId(event) {
+    return event.LOCID || event.locationId || event.locid;
+  }
+
+  function getBioId(event) {
+    return event.BIOID;
+  }
 </script>
 
 <div bind:this={mapElement} id="map"></div>
@@ -238,7 +315,8 @@
 <style>
   #map {
     flex: 3;
-    height: 450px;
+    height: 60vh;
+    min-height: 300px;
     border: 1px solid #ccc;
     border-radius: 4px;
   }

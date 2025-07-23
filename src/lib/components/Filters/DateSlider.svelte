@@ -3,15 +3,18 @@
 
   let sliderMinElement;
   let sliderMaxElement;
-  
+
   const MIN_YEAR = 1400;
   const MAX_YEAR = 1590;
 
-  // Initialize values
-  let minValue = $dateSliderMin;
-  let maxValue = $dateSliderMax;
+  // Step 1: Don't assign $stores at top-level!
+  // Instead, use reactive statements so values track the store.
+  let minValue;
+  let maxValue;
 
-  // Reactive statements
+  $: minValue = $dateSliderMin;
+  $: maxValue = $dateSliderMax;
+
   $: {
     updateDateRange();
     updateSliderBackground();
@@ -20,30 +23,29 @@
 
   function updateDateRange() {
     if (typeof document === 'undefined') return;
-    
+
     const activeStartLabel = document.querySelector('.slider-active-label-start');
     const activeEndLabel = document.querySelector('.slider-active-label-end');
-    
+
     if (activeStartLabel && activeEndLabel && sliderMinElement && sliderMaxElement) {
       const minPercent = ((minValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
       const maxPercent = ((maxValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
-      
+
       activeStartLabel.style.left = `${minPercent}%`;
-      activeStartLabel.textContent = minValue.toString();
-      
+      activeStartLabel.textContent = minValue?.toString();
       activeEndLabel.style.left = `${maxPercent}%`;
-      activeEndLabel.textContent = maxValue.toString();
+      activeEndLabel.textContent = maxValue?.toString();
     }
   }
 
   function updateSliderBackground() {
     if (typeof document === 'undefined') return;
-    
+
     const sliderTrack = document.querySelector('.slider-track');
     if (sliderTrack) {
       const minPercent = ((minValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
       const maxPercent = ((maxValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
-      
+
       sliderTrack.style.background = `linear-gradient(
         to right,
         #ddd 0%,
@@ -61,9 +63,8 @@
       ...f,
       dateRange: { min: minValue, max: maxValue }
     }));
-    
-    dateSliderMin.set(minValue);
-    dateSliderMax.set(maxValue);
+    dateSliderMin.set(minValue ?? MIN_YEAR);
+    dateSliderMax.set(maxValue ?? MAX_YEAR);
   }
 
   function handleMinChange() {
@@ -78,12 +79,11 @@
     }
   }
 </script>
-
+<!-- The rest of your markup and styles remain unchanged -->
 <div class="slider-container">
   <div class="slider-wrapper">
     <!-- Background track -->
     <div class="slider-track"></div>
-    
     <!-- Min range slider -->
     <input 
       bind:this={sliderMinElement}
@@ -94,7 +94,6 @@
       on:input={handleMinChange}
       class="slider slider-min"
     />
-    
     <!-- Max range slider -->
     <input 
       bind:this={sliderMaxElement}
@@ -106,7 +105,6 @@
       class="slider slider-max"
     />
   </div>
-  
   <!-- Labels -->
   <div class="slider-active-label-container">
     <div class="slider-active-label-start"></div>

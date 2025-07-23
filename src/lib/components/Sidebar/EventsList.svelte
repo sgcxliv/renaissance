@@ -1,12 +1,10 @@
 <script>
   import { sidebarState } from '$lib/stores/map.js';
-  import { searchCount } from '$lib/stores/filters.js';
   import EventDetails from './EventDetails.svelte';
 
   let selectedEvent = null;
 
   $: visibleEvents = $sidebarState.activeMarkers || [];
-  $: searchCount.set(visibleEvents.length);
 
   function selectEvent(event) {
     selectedEvent = selectedEvent?.EVID === event.EVID ? null : event;
@@ -27,6 +25,15 @@
 
 <div class="sidebar-content">
   <h3>Visible Events</h3>
+  <div class="visible-count">
+    {visibleEvents.length} event{visibleEvents.length === 1 ? '' : 's'} visible
+  </div>
+
+  {#if visibleEvents.some(ev => !ev.EVID)}
+    <div style="color: red; font-weight:bold; margin-bottom:8px;">
+      Warning: One or more events missing a unique EVID.
+    </div>
+  {/if}
   
   {#if visibleEvents.length === 0}
     <p class="no-events">No events match current filters</p>
@@ -39,7 +46,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each visibleEvents as event (event.EVID)}
+          {#each visibleEvents as event, i (event.EVID || i)}
             <tr 
               class="event-row"
               class:selected={selectedEvent?.EVID === event.EVID}
@@ -80,6 +87,14 @@
     color: #333;
     border-bottom: 1px solid #ddd;
     padding-bottom: 0.5rem;
+  }
+
+  .visible-count {
+    font-size: 1rem;
+    color: #666;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #eaeaea;
   }
 
   .no-events {

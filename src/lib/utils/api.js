@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import { fetchSheetData } from './dataFetcher.js'; // Adjust path if needed
 
 // Map each sheet name to its CSV URL (fill these in as you publish each tab)
 const CSV_URLS = {
@@ -15,24 +16,6 @@ const CSV_URLS = {
   Occasions:      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8tt4L7gHwTKjEuXIM52IbLZ9q-Sz-ANl1TU0BZM-SxlGtgPQjNUSUX1w46Smv9rzLqHgpbdG0VCx6/pub?gid=720598622&single=true&output=csv"
 };
 
-// Fetch and parse CSV into array of objects (using PapaParse, robust)
-export async function fetchSheetData(sheetName) {
-  const csvUrl = CSV_URLS[sheetName];
-  if (!csvUrl) throw new Error(`No CSV URL for sheet: ${sheetName}`);
-  const response = await fetch(csvUrl);
-  const csv = await response.text();
-
-  return new Promise((resolve, reject) => {
-    Papa.parse(csv, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => resolve(results.data),
-      error: reject
-    });
-  });
-}
-
-// Load all sheets (metadata) as before
 export async function loadAllMetadata() {
   const sheets = Object.keys(CSV_URLS);
   const metadata = {};
@@ -46,5 +29,39 @@ export async function loadAllMetadata() {
       }
     })
   );
+  // Robust normalization at the source (optional, not required!)
+  if (metadata.Events) {
+    metadata.Events = metadata.Events
+      .map(event => ({
+        ...event,
+        LOCID: event.LOCID || getField(
+          event,
+          "Location ID (LOC)", " Location ID (LOC)", "Location Id (LOC)"
+        ),
+        BIOID: event.BIOID || getField(
+          event,
+          "Biography ID (BCO, BMU, BNO)",
+          "Biography Musician (BMU) ID",
+          "Biography Composer (BCO) ID",
+          "Biography Nonmusician (BNO) ID"
+        ),
+        INSID: event.INSID || getField(event, "Institution ID (INS)")
+      }))
+      .filter(event => event.LOCID && event.BIOID);
+  }
   return metadata;
+}
+
+// You would also need to define getField above:
+function getField(obj, ...possibleKeys) {
+  for (const key of possibleKeys) {
+    if (obj[key] !== undefined) return obj[key];
+    let found = Object.keys(obj).find(k => k.trim() === key.trim());
+    if (found) return obj[found];
+    found = Object.keys(obj).find(
+      k => k.trim().toLowerCase() === key.trim().toLowerCase()
+    );
+    if (found) return obj[found];
+  }
+  return undefined;
 }

@@ -76,7 +76,7 @@ function matchesSearchText(event, searchText, lookupTables) {
   const personName = personInfo?.name || '';
   
   // Get location name
-  const locationInfo = lookupTables.Locations?.[event.LOCID];
+  const locationInfo = lookupTables.Locations?.[event.LOCID]; // FIXED: use LOCID!
   const locationName = locationInfo?.LOCNAME || '';
   
   // Get aliases

@@ -55,12 +55,31 @@ export const lookupTables = derived(mapData, ($mapData) => {
     
     lookup[sheet] = {};
     
+    // Before building the lookup table for each sheet:
+    const keyMap = {
+      'Locations': { id: 'LOCID', fallback: 'Location ID (LOC)' },
+      'Bio_Musicians': { 
+        id: 'BMUID', 
+        fallback: 'Biography ID (BCO, BMU, BNO)', 
+        alt: 'Biography Musician (BMU) ID' // <-- add this line
+      },
+      // ...add for other sheets as needed
+    };
+
     // Find ID key dynamically based on sheet type
     let idKey = null;
     if (sheetArray.length > 0) {
       const firstEntry = sheetArray[0];
-      
-      // Look for specific ID patterns based on your documentation
+      if (keyMap[sheet]) {
+        if (firstEntry[keyMap[sheet].id]) {
+          idKey = keyMap[sheet].id;
+        } else if (firstEntry[keyMap[sheet].fallback]) {
+          idKey = keyMap[sheet].fallback;
+        } else if (keyMap[sheet].alt && firstEntry[keyMap[sheet].alt]) {
+          idKey = keyMap[sheet].alt;
+        }
+      }
+      // Try sheet-specific patterns first
       const idPatterns = {
         'Locations': ['LOCID', 'LOC_ID'],
         'Bio_Composers': ['BCOID', 'BCO_ID'],
@@ -111,6 +130,7 @@ export const lookupTables = derived(mapData, ($mapData) => {
     }
     
     console.log(`${sheet} lookup table created with ${Object.keys(lookup[sheet]).length} entries`);
+    console.log(`${sheet} lookup keys:`, Object.keys(lookup[sheet]).slice(0, 10));
   }
   
   console.log('Lookup tables built:', Object.keys(lookup));
@@ -168,6 +188,41 @@ export async function initializeData() {
       data[sheet] = await fetchSheetData(sheet);
       console.log(`${sheet} loaded:`, data[sheet].length, 'records');
     }
+    
+    // --- ADD THIS: Normalize Events after fetching ---
+    if (data.Events) {
+      function clean(s) { return typeof s === "string" ? s.replace(/^\uFEFF/, "").trim() : s; }
+      function getField(o, ...names) {
+        for (const key of names) {
+          for (const k of Object.keys(o)) {
+            if (
+              k === key || clean(k) === clean(key) ||
+              clean(k).toLowerCase() === clean(key).toLowerCase()
+            ) return o[k];
+          }
+        }
+        return undefined;
+      }
+      data.Events = data.Events.map(event => {
+        const locid = event.LOCID || getField(
+          event, "Location ID (LOC)", " Location ID (LOC)", "Location Id (LOC)"
+        );
+        const bioid = event.BIOID || getField(
+          event, "Biography ID (BCO, BMU, BNO)",
+          "Biography Musician (BMU) ID", "Biography Composer (BCO) ID", "Biography Nonmusician (BNO) ID"
+        );
+        const insid = event.INSID || getField(event, "Institution ID (INS)");
+        return {
+          ...event,
+          LOCID: locid,
+          BIOID: bioid,
+          INSID: insid
+        };
+      });
+      // Optional: log to verify
+      console.log("First 3 normalized events (from data.js):", data.Events.slice(0, 3));
+    }
+    // --- END NORMALIZATION ---
     
     console.log('All data loaded successfully');
     
@@ -249,6 +304,7 @@ export async function refreshSheet(sheetName) {
 
 /**
  * Get all events with location data
+ * (EVENT LOCID, NOT long-name!)
  */
 export const eventsWithLocations = derived(
   [mapData, lookupTables],

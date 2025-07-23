@@ -28,46 +28,15 @@ export const filteredEvents = derived(
   mapData,
   $mapData => $mapData.METADATA?.Events || []
 );
-///**
-// * Derived store that applies all filters to events
-// */
-//export const filteredEvents = derived(
-//  [mapData, filters, lookupTables],
-//  ([$mapData, $filters, $lookupTables]) => {
-//    console.log('=== Filtering Events ===');
-//    console.log('mapData METADATA keys:', Object.keys($mapData.METADATA || {}));
-//    console.log('filters:', $filters);
-//    console.log('lookupTables keys:', Object.keys($lookupTables || {}));
-//    
-//    // Get raw events from METADATA
-//    const rawEvents = $mapData.METADATA?.Events || [];
-//    
-//    if (!Array.isArray(rawEvents)) {
-//      console.log('No events array found in mapData.METADATA');
-//      return [];
-//    }
-//    
-//    console.log('Raw events count:', rawEvents.length);
-//    
-//    if (rawEvents.length === 0) {
-//      console.log('No events to filter');
-//      return [];
-//    }
-//    
-//    // Log sample event structure
-//    if (rawEvents.length > 0) {
-//      console.log('Sample event structure:', Object.keys(rawEvents[0]));
-//    }
-//    
-//    // Apply filters using your filterHelpers function
-//    const filtered = applyFilters(rawEvents, $filters, $lookupTables, {});
-//    
-//    console.log('Filtered events count:', filtered.length);
-//    console.log('========================');
-//    
-//    return filtered;
-//  }
-//);
+// If you want filtering, uncomment and fix this block with correct fieldnames!
+// export const filteredEvents = derived(
+//   [mapData, filters, lookupTables],
+//   ([$mapData, $filters, $lookupTables]) => {
+//     const rawEvents = $mapData.METADATA?.Events || [];
+//     if (!Array.isArray(rawEvents)) return [];
+//     return applyFilters(rawEvents, $filters, $lookupTables, {});
+//   }
+// );
 
 /**
  * Events with location data for map display
@@ -78,61 +47,40 @@ export const mappableEvents = derived(
     if (!$filteredEvents || $filteredEvents.length === 0) {
       return [];
     }
-    
     const mappable = $filteredEvents.map(event => {
-      const location = $lookupTables.Locations?.[event.LOCID];
-      
+      const location = $lookupTables.Locations?.[event.LOCID]; // Use LOCID per your sheet!
       if (!location) {
         console.warn(`No location found for event ${event.EVID} with LOCID: ${event.LOCID}`);
         return null;
       }
-      
-      // Extract coordinates from location data
+      // Try to get coordinates from COORD
       let coordinates = null;
-      if (location.coordinates) {
-        // If coordinates are stored as a string like "45.4642,9.1900"
-        const coords = location.coordinates.split(',');
-        if (coords.length === 2) {
-          coordinates = [parseFloat(coords[0]), parseFloat(coords[1])];
+      if (location.COORD) {
+        // Ex: "45.4642,9.1900"
+        const coords = location.COORD.split(',').map(Number);
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+          coordinates = [coords[0], coords[1]];
         }
-      } else if (location.lat && location.lng) {
-        // If stored separately
-        coordinates = [parseFloat(location.lat), parseFloat(location.lng)];
-      } else if (location.latitude && location.longitude) {
-        // Alternative naming
-        coordinates = [parseFloat(location.latitude), parseFloat(location.longitude)];
       }
-      
-      if (!coordinates || isNaN(coordinates[0]) || isNaN(coordinates[1])) {
+      if (!coordinates) {
         console.warn(`Invalid coordinates for location ${event.LOCID}:`, location);
         return null;
       }
-      
       return {
         ...event,
         location: location,
         coordinates: coordinates,
-        // Add person information for display
         personInfo: getPersonInfo(event, $lookupTables),
-        // Add institution information
         institutionInfo: getInstitutionInfo(event, $lookupTables)
       };
-    }).filter(event => event !== null); // Remove events without valid locations
-    
+    }).filter(e => e !== null);
     console.log(`Mappable events: ${mappable.length} out of ${$filteredEvents.length} filtered events`);
     return mappable;
   }
 );
+
 console.debug('✅ filteredEvents in map.js:', filteredEvents);
 
-
-/**
- * Update sidebarState when filteredEvents changes
- */
-console.log('filteredEvents here:', filteredEvents, typeof filteredEvents);
-if (!filteredEvents || typeof filteredEvents.subscribe !== 'function') {
-  throw new Error('filteredEvents does not have a subscribe method:', filteredEvents);
-}
 filteredEvents.subscribe(events => {
   console.log('Updating sidebarState with', events.length, 'filtered events');
   sidebarState.update(state => ({
@@ -143,17 +91,16 @@ filteredEvents.subscribe(events => {
   }));
 });
 
+
 /**
  * Helper function to get person information for an event
  */
 function getPersonInfo(event, lookupTables) {
   if (!event.BIOID) return null;
-  
   const bioId = event.BIOID;
   const type = bioId.substring(0, 3);
   let personInfo = null;
   let nameField = '';
-  
   switch (type) {
     case "BCO":
       personInfo = lookupTables.Bio_Composers?.[bioId];
@@ -171,12 +118,10 @@ function getPersonInfo(event, lookupTables) {
       console.warn(`Unknown person type: ${type} for BIOID: ${bioId}`);
       return null;
   }
-  
   if (!personInfo) {
     console.warn(`No person info found for ${bioId}`);
     return null;
   }
-  
   return {
     ...personInfo,
     name: personInfo[nameField] || 'Unknown',
@@ -190,14 +135,11 @@ function getPersonInfo(event, lookupTables) {
  */
 function getInstitutionInfo(event, lookupTables) {
   if (!event.INSID) return null;
-  
   const institutionInfo = lookupTables.Institutions?.[event.INSID];
-  
   if (!institutionInfo) {
     console.warn(`No institution info found for ${event.INSID}`);
     return null;
   }
-  
   return institutionInfo;
 }
 
@@ -210,7 +152,7 @@ export function selectEvent(event) {
     selectedEvent: event,
     selectedMarker: event
   }));
-  
+
   sidebarState.update(state => ({
     ...state,
     selectedEvent: event
@@ -226,7 +168,7 @@ export function clearSelection() {
     selectedEvent: null,
     selectedMarker: null
   }));
-  
+
   sidebarState.update(state => ({
     ...state,
     selectedEvent: null
@@ -260,12 +202,10 @@ export function toggleSidebar() {
 export const searchResults = derived(
   [filteredEvents, lookupTables],
   ([$filteredEvents, $lookupTables]) => {
-    // This can be used by search components to get searchable events
     return $filteredEvents.map(event => {
       const personInfo = getPersonInfo(event, $lookupTables);
       const locationInfo = $lookupTables.Locations?.[event.LOCID];
       const institutionInfo = getInstitutionInfo(event, $lookupTables);
-      
       return {
         ...event,
         searchableText: [
@@ -281,4 +221,4 @@ export const searchResults = derived(
       };
     });
   }
-); 
+);

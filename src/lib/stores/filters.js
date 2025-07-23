@@ -1,9 +1,8 @@
 import { writable, derived } from 'svelte/store';
 
-/**
- * Filters store for managing all filtering options
- * Matches the structure expected by filterHelpers.js
- */
+export const dateSliderMin = writable(1400);
+export const dateSliderMax = writable(1600);
+
 export const filters = writable({
   // Person type filters
   showComposers: true,
@@ -76,9 +75,6 @@ export function resetFilters() {
     activeNames: new Set()
   });
 }
-
-export const dateSliderMin = 1400;
-export const dateSliderMax = 1600;
 
 export const searchResults = writable([]);
 

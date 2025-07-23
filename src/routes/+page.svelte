@@ -443,7 +443,8 @@
     
     .map-slider-container {
       width: 100%;
-      height: 450px;
+      height: 60vh;
+      min-height: 300px;
     }
 
     #sidebar {

@@ -58,6 +58,7 @@ export function getClusterColor(markers) {
 // Create popup content
 export function createPopupContent(event, lookupTables, headerIndex) {
   const personInfo = getPersonInfo(event.BIOID, lookupTables, headerIndex);
+  // FIXED: use event.LOCID not event["Location ID (LOC)"]
   const locationInfo = findInfo(event.LOCID, "Locations", lookupTables);
   
   if (!personInfo || !locationInfo) return '';
@@ -104,7 +105,7 @@ export function createPopupContent(event, lookupTables, headerIndex) {
 
 // Get location display with uncertainty markers
 function getLocationDisplay(locationInfo, event) {
-  const LOCNAME = 'LOCNAME'; // This should use headerIndex in real implementation
+  const LOCNAME = 'LOCNAME'; // Should use headerIndex in a more abstract build, but fine as literal here.
   const CITY = 'CITY';
   
   let location = locationInfo[LOCNAME] || '';
