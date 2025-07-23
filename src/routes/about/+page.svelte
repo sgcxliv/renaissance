@@ -125,6 +125,8 @@
     }
   }
 </style>
+    <section>
+        <p>
             This interactive map displays historical events related to musicians, composers,
             and other figures in music history from 1400-1600.
         </p>
