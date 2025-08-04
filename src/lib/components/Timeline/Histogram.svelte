@@ -96,15 +96,15 @@
     background: transparent;
     border-radius: 0;
     padding: 0;
-    margin: 0;
+    margin: 0 0 0.25rem 0; /* Reduced bottom margin */
   }
 
   .histogram-wrapper {
     display: flex;
     align-items: end;
     justify-content: space-between;
-    height: 60px; /* You can adjust this value to make the histogram taller */
-    margin-bottom: 3px;
+    height: 45px; /* Reduced height from 60px to 45px */
+    margin-bottom: 2px; /* Reduced margin */
     padding: 0;
   }
 

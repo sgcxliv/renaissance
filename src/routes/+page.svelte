@@ -203,12 +203,6 @@
             </div>
           </div>
 
-          <!-- Timeline Slider and Histogram -->
-          <div class="timeline-wrapper">
-            <Histogram />
-            <DateSlider />
-          </div>
-
           <!-- Map Legend -->
           <div class="legend-wrapper">
             <h4>General Map legend:</h4>
@@ -217,6 +211,12 @@
               <div class="legend-item">Color = Composer/Musician/Non-Musician</div>
               <div class="legend-item">Shape = Political/Ecclesiastical/Other</div>
             </div>
+          </div>
+
+          <!-- Timeline Slider and Histogram -->
+          <div class="timeline-wrapper">
+            <Histogram />
+            <DateSlider />
           </div>
         </div>
       </div>
@@ -363,7 +363,7 @@
   }
 
   .timeline-wrapper {
-    padding: 1rem 0.75rem; /* Increase vertical padding to make the area taller */
+    padding: 0.25rem 0.75rem; /* Further reduced vertical padding */
     background-color: #f0ede5;
     border-top: 1px solid #8b7355;
     flex-shrink: 0;

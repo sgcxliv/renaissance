@@ -1,5 +1,6 @@
 <script>
   import { sidebarState, mappableEvents } from '$lib/stores/map.js';
+  import { lookupTables } from '$lib/stores/data.js';
   import EventDetails from './EventDetails.svelte';
 
   let selectedEvent = null;
@@ -10,8 +11,8 @@
     selectedEvent = $sidebarState.selectedEvent;
   }
 
-  // Use mappableEvents directly instead of sidebarState.activeMarkers
-  $: visibleEvents = ($mappableEvents || []).filter(event => {
+  // Use sidebarState.activeMarkers which contains events visible in current map view
+  $: visibleEvents = ($sidebarState.activeMarkers || []).filter(event => {
     const description = event.Description || '';
     return description.trim().length > 0;
   });
@@ -49,6 +50,48 @@
     return `[${dateRange}] ${personName}: ${description}`;
   }
 
+  function formatExpandedEventSummary(event) {
+    // Get person name from BIOID lookup
+    let personName = 'Unknown person';
+    if (event.BIOID && $lookupTables) {
+      const bioid = event.BIOID;
+      let person = null;
+      
+      if (bioid.startsWith('BCO:')) {
+        person = $lookupTables.Bio_Composers?.[bioid];
+        if (person) personName = person['Composer Name'] || 'Unknown composer';
+      } else if (bioid.startsWith('BMU:')) {
+        person = $lookupTables.Bio_Musicians?.[bioid];
+        if (person) personName = person['Musician Name'] || 'Unknown musician';
+      } else if (bioid.startsWith('BNO:')) {
+        person = $lookupTables.Bio_Nonmusicians?.[bioid];
+        if (person) personName = person['Non-musician Name'] || 'Unknown non-musician';
+      }
+    }
+
+    // Get location name from LOCID lookup
+    let locationName = 'Unknown location';
+    if (event.LOCID && $lookupTables?.Locations) {
+      const location = $lookupTables.Locations[event.LOCID];
+      if (location) {
+        locationName = location['Name of Location'] || location.LOCNAME || 'Unknown location';
+        if (location.CITY) {
+          locationName += `, ${location.CITY}`;
+        }
+      }
+    }
+
+    const dateRange = event.DATERANGE || event['Date Range'] || 'Unknown date';
+    const description = event.Description || 'No description available';
+    
+    return {
+      personName,
+      locationName,
+      dateRange,
+      description
+    };
+  }
+
   function sanitizeEventId(eventId) {
     return eventId?.replace(/[^a-zA-Z0-9-_]/g, '_') || '';
   }
@@ -69,9 +112,8 @@
 <div class="sidebar-container">
   <!-- Events List Section -->
   <div class="events-section" class:collapsed={selectedEvent}>
-    <!-- <h3>Events<br><span class="subtitle">(click to select)</span></h3> -->
-    <div class="visible-count">
-      {visibleEvents.length} event{visibleEvents.length === 1 ? '' : 's'} visible
+    <div class="events-header">
+      <h3><strong>Events:</strong> {visibleEvents.length} Visible</h3>
     </div>
 
     {#if visibleEvents.some(ev => !ev.EVID)}
@@ -129,8 +171,16 @@
       <div class="tab-content">
         {#if activeTab === 'about'}
           <div class="about-content">
-            <!-- Basic Event Details -->
-            <EventDetails event={selectedEvent} />
+            <!-- Event Details with Date, Person, Location, and Description -->
+            {#if selectedEvent}
+              {@const eventInfo = formatExpandedEventSummary(selectedEvent)}
+              <div class="event-details-compact">
+                <div class="detail-line"><strong>Date:</strong> {eventInfo.dateRange}</div>
+                <div class="detail-line"><strong>Person:</strong> {eventInfo.personName}</div>
+                <div class="detail-line"><strong>Location:</strong> {eventInfo.locationName}</div>
+                <div class="description-text">{eventInfo.description}</div>
+              </div>
+            {/if}
             
             <!-- Related Events -->
             <div class="related-section">
@@ -211,26 +261,13 @@
     }
   }
 
-  h3 {
+  .events-header h3 {
     margin: 0 0 0.5rem 0;
     font-size: 1rem;
     color: #333;
     border-bottom: 1px solid #ddd;
     padding-bottom: 0.25rem;
-  }
-
-  .subtitle {
-    font-size: 0.8rem;
     font-weight: normal;
-    color: #666;
-  }
-
-  .visible-count {
-    font-size: 0.9rem;
-    color: #666;
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.25rem;
-    border-bottom: 1px solid #eaeaea;
   }
 
   .no-events {
@@ -250,7 +287,7 @@
   .events-list {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0; /* Remove gap between events */
   }
 
   .event-item {
@@ -258,8 +295,14 @@
     transition: background-color 0.2s;
     padding: 0.5rem;
     border: 1px solid #eee;
-    border-radius: 3px;
+    border-radius: 0; /* Remove border radius for tight fit */
     background-color: white;
+    margin-bottom: 0; /* Remove margin */
+    border-bottom: none; /* Remove bottom border to make them kiss */
+  }
+
+  .event-item:last-child {
+    border-bottom: 1px solid #eee; /* Add border to last item */
   }
 
   .event-item:hover {
@@ -314,15 +357,7 @@
   .source-content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .story-link {
-    margin-top: 0.5rem;
-    color: #2196f3;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.9rem;
+    gap: 0; /* Remove gap between sections */
   }
 
   /* Related Section */
@@ -331,6 +366,32 @@
     border-radius: 4px;
     padding: 1rem;
     background: white;
+    margin-top: 0.75rem; /* Space only above related section */
+  }
+
+  /* Event Details Compact Layout */
+  .event-details-compact {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+  }
+
+  .detail-line {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .detail-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .description-text {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #333;
   }
 
   .related-section h4 {

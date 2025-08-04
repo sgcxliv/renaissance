@@ -61,13 +61,15 @@ export function createPopupContent(event, lookupTables, headerIndex) {
   // FIXED: use event.LOCID not event["Location ID (LOC)"]
   const locationInfo = findInfo(event.LOCID, "Locations", lookupTables);
   
-  if (!personInfo || !locationInfo) return '';
+  if (!locationInfo) return '';
+  
+  // Use location name as the title instead of person name
+  const locationDisplay = getLocationDisplay(locationInfo, event);
   
   let content = `
     <div class="popup-content">
-      <h3>${personInfo.name}</h3>
+      <h3>${locationDisplay}</h3>
       <p><strong>Date:</strong> ${event.DATERANGE || 'Unknown'}</p>
-      <p><strong>Place:</strong> ${getLocationDisplay(locationInfo, event)} </p>
   `;
   
   if (event.Description) {
