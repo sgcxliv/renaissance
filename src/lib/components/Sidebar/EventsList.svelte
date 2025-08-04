@@ -1,13 +1,14 @@
 <script>
-  import { sidebarState } from '$lib/stores/map.js';
+  import { sidebarState, mappableEvents } from '$lib/stores/map.js';
   import EventDetails from './EventDetails.svelte';
 
   let selectedEvent = null;
 
-  $: visibleEvents = $sidebarState.activeMarkers || [];
+  // Use mappableEvents directly instead of sidebarState.activeMarkers
+  $: visibleEvents = $mappableEvents || [];
   
   $: {
-    console.log('EventsList: sidebarState activeMarkers count:', visibleEvents.length);
+    console.log('EventsList: mappableEvents count:', visibleEvents.length);
     console.log('EventsList: first few events:', visibleEvents.slice(0, 3));
   }
 

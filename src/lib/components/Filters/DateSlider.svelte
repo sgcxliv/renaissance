@@ -1,11 +1,12 @@
 <script>
-  import { filters, dateSliderMin, dateSliderMax } from '$lib/stores/filters.js';
+  import { filters, dateSliderMin, dateSliderMax, actualDateRange } from '$lib/stores/filters.js';
 
   let sliderMinElement;
   let sliderMaxElement;
 
-  const MIN_YEAR = 1400;
-  const MAX_YEAR = 1600;
+  // Use actual data range instead of hardcoded values
+  $: MIN_YEAR = $actualDateRange.min;
+  $: MAX_YEAR = $actualDateRange.max;
 
   // Initialize values from stores
   let minValue = $dateSliderMin;
@@ -15,9 +16,9 @@
   $: minValue = $dateSliderMin;
   $: maxValue = $dateSliderMax;
 
-  // Use dynamic range for sliders based on actual data
-  $: actualMinYear = Math.min(MIN_YEAR, minValue - 10);
-  $: actualMaxYear = Math.max(MAX_YEAR, maxValue + 10);
+  // Use the actual data range for sliders
+  $: actualMinYear = MIN_YEAR;
+  $: actualMaxYear = MAX_YEAR;
 
   // Update visual elements when values change
   $: if (minValue !== undefined && maxValue !== undefined) {

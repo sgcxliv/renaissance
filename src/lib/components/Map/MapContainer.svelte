@@ -12,6 +12,19 @@
   let markerCluster;
   let allProcessedEvents = [];
   let failedEvents = [];
+  let initialLoadComplete = false;
+
+  // Auto-remove limiting after 3 seconds
+  onMount(() => {
+    setTimeout(() => {
+      initialLoadComplete = true;
+      console.log('Initial load period complete - removing event limiting');
+      // Trigger a re-render of markers without limitations
+      if (map && markerCluster && allProcessedEvents.length > 0) {
+        filterAndUpdateMarkers($filters);
+      }
+    }, 3000);
+  });
 
   // Utility: filter events to only those visible in map viewport
   function filterEventsInView(events, map) {
@@ -53,12 +66,27 @@
   function initializeMap() {
     if (!mapElement) return;
 
+    // Initialize map focused on Central Europe/Northern Italy (Renaissance heartland)
+    // Starting point: Florence, Italy area with moderate zoom to show regional context
     map = L.map(mapElement, {
       preferCanvas: true
-    }).setView([47, 9], 5);
+    }).setView([45.5, 10.5], 7); // Florence region, zoomed in more
 
+    // Set min/max zoom levels
     map.options.minZoom = 4;
     map.options.maxZoom = 19;
+
+    // Define Europe bounds (approximate)
+    const europeBounds = L.latLngBounds(
+      L.latLng(34.5, -25), // Southwest (South Spain/Portugal, Atlantic)
+      L.latLng(71, 45)     // Northeast (North Scandinavia, Ural Mountains)
+    );
+
+    // Set max bounds to restrict panning to Europe
+    map.setMaxBounds(europeBounds);
+    map.on('drag', function() {
+      map.panInsideBounds(europeBounds, { animate: false });
+    });
 
     // Add tile layer
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -199,10 +227,30 @@
     // Step 2: Further filter to only events visible in current map bounds
     filteredEvents = filterEventsInView(filteredEvents, map);
 
-    // Optional: Further cap at max 300 at a time for performance/testing
-    // filteredEvents = filteredEvents.slice(0, 300);
+    // Step 3: Apply initial load limiting for first 3 seconds only
+    if (!initialLoadComplete && filteredEvents.length > 100) {
+      console.log(`Initial load: limiting to 100 events (${filteredEvents.length} available)`);
+      // Get map center for distance calculation
+      const center = map.getCenter();
+      
+      // Calculate distance from center and sort by proximity
+      filteredEvents = filteredEvents
+        .map(event => {
+          if (!event.coordinates) return null;
+          const [lat, lng] = event.coordinates;
+          const distance = Math.sqrt(
+            Math.pow(lat - center.lat, 2) + Math.pow(lng - center.lng, 2)
+          );
+          return { ...event, distanceFromCenter: distance };
+        })
+        .filter(e => e !== null)
+        .sort((a, b) => a.distanceFromCenter - b.distanceFromCenter)
+        .slice(0, 100); // Show closest 100 events during initial load
+    } else if (initialLoadComplete && filteredEvents.length > 100) {
+      console.log(`Post-initial load: showing all ${filteredEvents.length} events`);
+    }
 
-    // Step 3: Now create markers for just these items
+    // Step 4: Now create markers for filtered events
     const newMarkers = [];
 
     filteredEvents.forEach(event => {
@@ -237,7 +285,7 @@
     // Update sidebar
     updateSidebarWithMarkers(newMarkers);
 
-    console.log(`Displaying ${newMarkers.length} markers`);
+    console.log(`Displaying ${newMarkers.length} markers${!initialLoadComplete ? ' (initial load - more coming)' : ''}`);
   }
 
   function updateMapBounds() {

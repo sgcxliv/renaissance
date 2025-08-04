@@ -29,19 +29,19 @@ export function applyFilters(events, filters, lookupTables, headerIndex) {
     const endYear = parseInt(event.LYEAR) || 1600;
     
     // Debug first few events
-    const shouldDebug = Math.random() < 0.01; // Debug ~1% of events
-    if (shouldDebug) {
-      console.log('filterHelpers date check:', {
-        EVID: event.EVID,
-        EYEAR: event.EYEAR,
-        LYEAR: event.LYEAR,
-        startYear,
-        endYear,
-        dateRangeMin: dateRange.min,
-        dateRangeMax: dateRange.max,
-        passes: !(endYear < dateRange.min || startYear > dateRange.max)
-      });
-    }
+    // const shouldDebug = Math.random() < 0.01; // Debug ~1% of events
+    // if (shouldDebug) {
+    //   console.log('filterHelpers date check:', {
+    //     EVID: event.EVID,
+    //     EYEAR: event.EYEAR,
+    //     LYEAR: event.LYEAR,
+    //     startYear,
+    //     endYear,
+    //     dateRangeMin: dateRange.min,
+    //     dateRangeMax: dateRange.max,
+    //     passes: !(endYear < dateRange.min || startYear > dateRange.max)
+    //   });
+    // }
     
     if (endYear < dateRange.min || startYear > dateRange.max) {
       return false;

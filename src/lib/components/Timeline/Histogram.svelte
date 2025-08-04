@@ -1,17 +1,16 @@
 <script>
-  import { filters } from '$lib/stores/filters.js';
+  import { filters, actualDateRange } from '$lib/stores/filters.js';
   import { mappableEvents } from '$lib/stores/map.js';
   import { generateHistogramData } from '$lib/utils/filterHelpers.js';
-  import { dateSliderMin, dateSliderMax } from '$lib/stores/filters.js';
 
   const DECADE_STEP = 10;
 
   let maxCount = 0;
   let histogramData = {};
 
-  // Use dynamic range based on actual data
-  $: START_YEAR = Math.floor(($dateSliderMin - 10) / 10) * 10;
-  $: END_YEAR = Math.ceil(($dateSliderMax + 10) / 10) * 10;
+  // Use actual data range from the loaded data
+  $: START_YEAR = $actualDateRange.min;
+  $: END_YEAR = $actualDateRange.max;
 
   // Use mappableEvents instead of sidebarState.activeMarkers
   $: {
@@ -64,14 +63,7 @@
     return `${year}s`;
   }
 
-  function handleBarClick(decade) {
-    console.log('Bar clicked for decade:', decade);
-    // Update date slider to focus on this decade
-    filters.update(f => ({
-      ...f,
-      dateRange: { min: decade, max: decade + 9 }
-    }));
-  }
+
 </script>
 
 <div class="histogram-container">
@@ -81,10 +73,6 @@
         class="histogram-bar"
         style="height: {getBarHeight(histogramData[decade] || 0)};"
         title="{histogramData[decade] || 0} events in {getDecadeLabel(decade)}"
-        on:click={() => handleBarClick(decade)}
-        on:keydown={(e) => e.key === 'Enter' && handleBarClick(decade)}
-        role="button"
-        tabindex="0"
       >
         <div class="count-label">
           {histogramData[decade] || 0}
@@ -124,19 +112,13 @@
     flex: 1;
     background-color: #cccccc;
     margin: 0 1px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     min-height: 2px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
     position: relative;
     border-radius: 2px 2px 0 0;
-  }
-
-  .histogram-bar:hover {
-    background-color: #999999;
-    transform: translateY(-1px);
   }
 
   .count-label {
