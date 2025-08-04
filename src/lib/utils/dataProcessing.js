@@ -13,20 +13,21 @@ export function processEventForDisplay(event, lookupTables, headerIndex) {
   const locId = event.LOCID;
   const bioId = event.BIOID;
 
-  if (!locId || !bioId) {
-    console.warn("Event missing LOCID or BIOID", event);
+  // Check for missing required IDs
+  if (!locId || !bioId || locId.trim() === '' || bioId.trim() === '') {
+    console.warn("Event missing LOCID or BIOID", { EVID: event.EVID, LOCID: locId, BIOID: bioId });
     return null;
   }
 
   const locationInfo = findInfo(locId, "Locations", lookupTables);
   if (!locationInfo) {
-    console.warn("No locationInfo for LOCID", locId, event);
+    console.warn("No locationInfo for LOCID", locId, "Event:", event.EVID);
     return null;
   }
 
   const personInfo = getPersonInfo(bioId, lookupTables, headerIndex);
   if (!personInfo) {
-    console.warn("No personInfo for BIOID", bioId, event);
+    console.warn("No personInfo for BIOID", bioId, "Event:", event.EVID);
     return null;
   }
 

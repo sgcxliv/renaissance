@@ -102,14 +102,12 @@ export function createPopupContent(event, lookupTables, headerIndex) {
 
 // Get location display with uncertainty markers
 function getLocationDisplay(locationInfo, event) {
-  const LOCNAME = 'LOCNAME'; // Should use headerIndex in a more abstract build, but fine as literal here.
-  const CITY = 'CITY';
-  
-  let location = locationInfo[LOCNAME] || '';
+  // Use the same logic as EventsList component for consistency
+  let location = locationInfo['Name of Location'] || locationInfo.LOCNAME || '';
   
   // Add larger location if available
-  if (locationInfo[CITY]) {
-    location += `, ${locationInfo[CITY]}`;
+  if (locationInfo.CITY) {
+    location += `, ${locationInfo.CITY}`;
   }
   
   // Add uncertainty markers

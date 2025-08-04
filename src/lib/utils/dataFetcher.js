@@ -18,6 +18,23 @@ const CSV_URLS = {
 export async function fetchSheetData(sheetName) {
   const url = CSV_URLS[sheetName];
   if (!url) throw new Error(`No CSV URL for sheet: ${sheetName}`);
+
+  // Check cache first (cache for 5 minutes to speed up development)
+  const cacheKey = `sheet_${sheetName}`;
+  const cachedData = localStorage.getItem(cacheKey);
+  const cacheTimestamp = localStorage.getItem(`${cacheKey}_timestamp`);
+  
+  if (cachedData && cacheTimestamp) {
+    const age = Date.now() - parseInt(cacheTimestamp);
+    const maxAge = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    if (age < maxAge) {
+      console.log(`Using cached data for ${sheetName} (${Math.round(age/1000)}s old)`);
+      return JSON.parse(cachedData);
+    }
+  }
+
+  console.log(`Fetching fresh data for ${sheetName}...`);
   const response = await fetch(url);
   const csv = await response.text();
 
@@ -25,7 +42,17 @@ export async function fetchSheetData(sheetName) {
     Papa.parse(csv, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => resolve(results.data),
+      complete: (results) => {
+        // Cache the results
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(results.data));
+          localStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
+          console.log(`Cached data for ${sheetName}`);
+        } catch (e) {
+          console.warn(`Failed to cache ${sheetName}:`, e);
+        }
+        resolve(results.data);
+      },
       error: reject
     });
   });

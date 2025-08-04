@@ -169,9 +169,9 @@ export async function initializeData() {
   mapData.update(d => ({ ...d, isLoading: true, error: null }));
   
   try {
-    const sheets = [
-      'Events', 
-      'Locations', 
+    // Load critical data first (Events and Locations for basic map functionality)
+    const criticalSheets = ['Events', 'Locations'];
+    const supportingSheets = [
       'Bio_Composers', 
       'Bio_Musicians', 
       'Bio_Nonmusicians', 
@@ -183,13 +183,23 @@ export async function initializeData() {
     
     const data = {};
     
-    for (const sheet of sheets) {
-      console.log(`Fetching ${sheet}...`);
-      data[sheet] = await fetchSheetData(sheet);
-      console.log(`${sheet} loaded:`, data[sheet].length, 'records');
+    // Phase 1: Load critical data first
+    console.log('Phase 1: Loading critical data (Events, Locations)...');
+    const criticalPromises = criticalSheets.map(async (sheet) => {
+      console.log(`Starting fetch for ${sheet}...`);
+      const sheetData = await fetchSheetData(sheet);
+      console.log(`${sheet} loaded:`, sheetData.length, 'records');
+      return [sheet, sheetData];
+    });
+    
+    const criticalResults = await Promise.all(criticalPromises);
+    
+    // Add critical data to data object
+    for (const [sheet, sheetData] of criticalResults) {
+      data[sheet] = sheetData;
     }
     
-    // --- Normalize Events after fetching ---
+    // Normalize Events after critical data is loaded
     if (data.Events) {
       function clean(s) { return typeof s === "string" ? s.replace(/^\uFEFF/, "").trim() : s; }
       function getField(o, ...names) {
@@ -214,12 +224,11 @@ export async function initializeData() {
         );
         const insid = event.INSID || getField(event, "Institution ID (INS)");
         
-        // Map CSV field names to expected field names
         return {
           ...event,
           EVID: event.EVID || event.ID,
-          LOCID: locid || event['Location ID (LOC)'], // Fix: Use the actual CSV field name
-          BIOID: bioid || event['Biography ID (BCO, BMU, BNO)'], // Fix: Use the actual CSV field name  
+          LOCID: locid || event['Location ID (LOC)'],
+          BIOID: bioid || event['Biography ID (BCO, BMU, BNO)'],
           INSID: insid || event['Institution ID (INS)'],
           DATERANGE: event.DATERANGE || event['Date Range'],
           CERTLOC: event.CERTLOC || event['LOC Certainty'],
@@ -235,18 +244,35 @@ export async function initializeData() {
         };
       });
       
-      // Check for duplicate EVIDs
-      const evids = data.Events.map(e => e.EVID);
-      const duplicateEvids = evids.filter((evid, index) => evids.indexOf(evid) !== index);
-      if (duplicateEvids.length > 0) {
-        console.warn('Duplicate EVIDs found:', [...new Set(duplicateEvids)]);
-        console.warn('Total events:', data.Events.length, 'Unique EVIDs:', new Set(evids).size);
-      }
-      
       console.log("Events normalized. First event:", data.Events[0]);
-      console.log("Sample location data:", data.Locations?.[0]);
     }
-    // --- END NORMALIZATION ---
+    
+    // Update store with critical data - this allows the map to start rendering
+    mapData.update(d => ({
+      ...d,
+      METADATA: { ...data },
+      isLoading: false // Critical data is loaded, show the map
+    }));
+    
+    console.log('Phase 1 complete - Map can now render');
+    
+    // Phase 2: Load supporting data in background
+    console.log('Phase 2: Loading supporting data in background...');
+    const supportingPromises = supportingSheets.map(async (sheet) => {
+      console.log(`Starting background fetch for ${sheet}...`);
+      const sheetData = await fetchSheetData(sheet);
+      console.log(`${sheet} loaded in background:`, sheetData.length, 'records');
+      return [sheet, sheetData];
+    });
+    
+    const supportingResults = await Promise.all(supportingPromises);
+    
+    // Add supporting data to data object
+    for (const [sheet, sheetData] of supportingResults) {
+      data[sheet] = sheetData;
+    }
+    
+    console.log('Phase 2 complete - All data loaded');
     
     console.log('All data loaded successfully');
     

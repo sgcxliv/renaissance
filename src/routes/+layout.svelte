@@ -62,23 +62,26 @@
           return undefined;
         }
         metadata.Events = metadata.Events.map(event => {
-          // Fix: Use the actual CSV field names directly instead of getField() which was returning empty strings
-          const locid = event.LOCID || event['Location ID (LOC)'];
-          const bioid = event.BIOID || event['Biography ID (BCO, BMU, BNO)'];
-          const insid = event.INSID || event['Institution ID (INS)'];
+          // Fix: Use the actual CSV field names directly and handle empty values
+          const locid = event.LOCID || event['Location ID (LOC)'] || null;
+          const bioid = event.BIOID || event['Biography ID (BCO, BMU, BNO)'] || null;
+          const insid = event.INSID || event['Institution ID (INS)'] || null;
           
-          // Debug: log the raw values to understand the format
-          console.log('Raw event IDs - LOCID:', locid, 'BIOID:', bioid);
+          // Skip events with missing critical data
+          if (!locid || !bioid || locid.trim() === '' || bioid.trim() === '') {
+            console.warn('Skipping event with missing IDs:', event.EVID, 'LOCID:', locid, 'BIOID:', bioid);
+            return null;
+          }
           
           return {
             ...event,
-            LOCID: locid,
-            BIOID: bioid,
-            INSID: insid
+            LOCID: locid.trim(),
+            BIOID: bioid.trim(),
+            INSID: insid?.trim() || null
           };
-        });
-        // Optional: log to verify
-        console.log("First 3 normalized events:", metadata.Events.slice(0, 3));
+        }).filter(event => event !== null); // Remove null events
+        
+        console.log("Events after normalization:", metadata.Events.length, "valid events");
       }
 
       mapData.update(data => ({

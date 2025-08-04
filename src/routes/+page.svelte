@@ -41,6 +41,10 @@
     }
   });
 
+  // Check if we have critical data for basic map functionality
+  $: hasCriticalData = $mapData.METADATA?.Events && $mapData.METADATA?.Locations;
+  $: hasFullData = hasCriticalData && $mapData.METADATA?.Bio_Composers && $mapData.METADATA?.Bio_Musicians;
+
   // Debug reactive statements
   $: {
     console.log('=== Page Debug ===');
@@ -169,9 +173,16 @@
         Retry Loading Data
       </button>
     </div>
-  {:else if dataLoaded}
-    <!-- Main landing page -->
+  {:else if hasCriticalData}
+    <!-- Main landing page - show map with critical data loaded -->
     <div class="landing-container">
+      <!-- Show loading banner for background data -->
+      {#if !hasFullData}
+        <div class="partial-loading-banner">
+          <span>🔄 Loading additional features...</span>
+        </div>
+      {/if}
+      
       <!-- Banner Section -->
       <div class="banner-section">
         <div class="banner-content">
@@ -228,11 +239,12 @@
         <div class="loading-spinner"></div>
         <h2>Loading Musical Renaissance Map...</h2>
         <div class="loading-details">
-          <p>📊 Data loaded: {dataLoaded ? 'Yes' : 'No'}</p>
+          <p>📊 Critical data loaded: {hasCriticalData ? 'Yes' : 'No'}</p>
           <p>🔧 Component mounted: {mounted ? 'Yes' : 'No'}</p>
           <p>📁 Metadata keys: {Object.keys($mapData.METADATA || {}).join(', ') || 'None yet'}</p>
+          <p>⚡ Phase: {$mapData.isLoading ? 'Loading critical data (Events, Locations)...' : 'Ready for map rendering'}</p>
           {#if $mapData.isLoading}
-            <p>⏳ Fetching data from Google Sheets...</p>
+            <p>⏳ Fetching essential data from Google Sheets...</p>
           {/if}
         </div>
       </div>
@@ -398,7 +410,21 @@
     color: #333;
   }
 
-  /* Loading and Error States */
+  /* Partial Loading Banner */
+  .partial-loading-banner {
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+  }
   .loading-container {
     display: flex;
     justify-content: center;
