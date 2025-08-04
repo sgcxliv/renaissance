@@ -189,7 +189,7 @@ export async function initializeData() {
       console.log(`${sheet} loaded:`, data[sheet].length, 'records');
     }
     
-    // --- ADD THIS: Normalize Events after fetching ---
+    // --- Normalize Events after fetching ---
     if (data.Events) {
       function clean(s) { return typeof s === "string" ? s.replace(/^\uFEFF/, "").trim() : s; }
       function getField(o, ...names) {
@@ -203,6 +203,7 @@ export async function initializeData() {
         }
         return undefined;
       }
+      
       data.Events = data.Events.map(event => {
         const locid = event.LOCID || getField(
           event, "Location ID (LOC)", " Location ID (LOC)", "Location Id (LOC)"
@@ -212,15 +213,38 @@ export async function initializeData() {
           "Biography Musician (BMU) ID", "Biography Composer (BCO) ID", "Biography Nonmusician (BNO) ID"
         );
         const insid = event.INSID || getField(event, "Institution ID (INS)");
+        
+        // Map CSV field names to expected field names
         return {
           ...event,
-          LOCID: locid,
-          BIOID: bioid,
-          INSID: insid
+          EVID: event.EVID || event.ID,
+          LOCID: locid || event['Location ID (LOC)'], // Fix: Use the actual CSV field name
+          BIOID: bioid || event['Biography ID (BCO, BMU, BNO)'], // Fix: Use the actual CSV field name  
+          INSID: insid || event['Institution ID (INS)'],
+          DATERANGE: event.DATERANGE || event['Date Range'],
+          CERTLOC: event.CERTLOC || event['LOC Certainty'],
+          CERTEDATE: event.CERTEDATE || event['Earliest Date Certainty'],
+          CERTLDATE: event.CERTLDATE || event['Latest Date Certainty'],
+          CERTRANGE: event.CERTRANGE || event['Certainty of Event (within Range)'],
+          EYEAR: event.EYEAR || event['Earliest Year'],
+          LYEAR: event.LYEAR || event['Latest Year'],
+          DOEID: event.DOEID || event['Document Entry ID (DOE)'],
+          BIBID: event.BIBID || event['Bibliography ID (BIB)'],
+          BIBPAGES: event.BIBPAGES || event['BIB Pages'],
+          Description: event.Description || event.EINFO || getField(event, "Description", "Event Description")
         };
       });
-      // Optional: log to verify
-      console.log("First 3 normalized events (from data.js):", data.Events.slice(0, 3));
+      
+      // Check for duplicate EVIDs
+      const evids = data.Events.map(e => e.EVID);
+      const duplicateEvids = evids.filter((evid, index) => evids.indexOf(evid) !== index);
+      if (duplicateEvids.length > 0) {
+        console.warn('Duplicate EVIDs found:', [...new Set(duplicateEvids)]);
+        console.warn('Total events:', data.Events.length, 'Unique EVIDs:', new Set(evids).size);
+      }
+      
+      console.log("Events normalized. First event:", data.Events[0]);
+      console.log("Sample location data:", data.Locations?.[0]);
     }
     // --- END NORMALIZATION ---
     

@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { mapData, initializeData, lookupTables } from '$lib/stores/data.js';
-  import { filters, updateDateRange, dateSliderMin, dateSliderMax } from '$lib/stores/filters.js';
+  import { filters, updateDateRange } from '$lib/stores/filters.js';
   import { mapState, sidebarState, filteredEvents } from '$lib/stores/map.js';
   
   import Navbar from '$lib/components/Navigation/Navbar.svelte';
@@ -64,8 +64,8 @@
     // Get date range from actual data if available
     const events = $mapData.METADATA?.Events || [];
     if (events.length > 0) {
-      let minYear = 9999;
-      let maxYear = 0;
+      let minYear = 1600;
+      let maxYear = 1400;
       
       events.forEach(event => {
         const eyear = parseInt(event.EYEAR);
@@ -82,13 +82,8 @@
       });
       
       // Only update if we found valid years
-      if (minYear < maxYear && minYear !== 9999) {
+      if (minYear < maxYear) {
         console.log('Setting date range from data:', minYear, '-', maxYear);
-        console.log('Sample events from data:', events.slice(0, 3));
-        
-        // Don't artificially constrain the date range - use actual data bounds
-        dateSliderMin.set(minYear);
-        dateSliderMax.set(maxYear);
         filters.update(f => ({
           ...f,
           dateRange: { min: minYear, max: maxYear }
@@ -196,6 +191,8 @@
 
           <!-- About/Source Tabs - Only show when item selected -->
           <div class="info-tabs" class:hidden={!$sidebarState.selectedEvent}>
+          <!-- About/Source Tabs - Only show when item selected -->
+          <div class="info-tabs" class:hidden={!$sidebarState.selectedEvent}>
             <div class="tab-buttons">
               <button class="tab-btn active">About</button>
               <button class="tab-btn">Source</button>
@@ -273,15 +270,17 @@
             </div>
           </div>
 
-          <!-- Timeline Slider and Histogram -->
+          <!-- Timeline Slider -->
           <div class="timeline-wrapper">
-            <Histogram />
             <DateSlider />
           </div>
 
           <!-- Metadata Bar - Moved below map -->
           <div class="metadata-bar">
-            <span class="metadata-text">Metadata: {$filteredEvents?.length || 0} Events visible, time period selected</span>
+            <span class="metadata-text">
+              Metadata: {$sidebarState.totalEvents || 0} Events visible, 
+              {$filters.dateRange?.min || 1400} - {$filters.dateRange?.max || 1600} period selected
+            </span>
             <div class="zoom-controls">
               <span>Zoom in<br>out/map<br>controls</span>
             </div>
@@ -421,6 +420,13 @@
 
   .hidden {
     display: none;
+  }
+
+  .search-section {
+    background-color: #d4c4a0;
+    padding: 0.75rem;
+    border: 1px solid #8b7355;
+    border-radius: 4px;
   }
 
   .info-tabs {
@@ -585,7 +591,7 @@
     border: 2px solid #8b7355;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: visible; /* Allow child elements to extend beyond */
   }
 
   .metadata-bar {
@@ -594,7 +600,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #8b7355;
+    border-bottom: 1px solid #8b7355;
   }
 
   .metadata-text {
@@ -615,9 +621,9 @@
   .map-wrapper {
     position: relative;
     flex: 1;
-    min-height: 0;
-    height: 70vh;
-    overflow: visible;
+    min-height: 0; /* Allow flex to shrink */
+    height: 70vh; /* Fixed height to extend beyond container */
+    overflow: visible; /* Allow map to extend outside */
   }
 
   .search-note {
@@ -640,7 +646,7 @@
     border-top: 1px solid #8b7355;
     flex-shrink: 0;
     position: relative;
-    z-index: 10;
+    z-index: 10; /* Ensure timeline appears above extended map */
   }
 
   .legend-wrapper {
@@ -649,7 +655,7 @@
     border-top: 1px solid #8b7355;
     flex-shrink: 0;
     position: relative;
-    z-index: 10;
+    z-index: 10; /* Ensure legend appears above extended map */
   }
 
   .legend-wrapper h4 {

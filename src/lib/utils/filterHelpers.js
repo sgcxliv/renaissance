@@ -28,6 +28,21 @@ export function applyFilters(events, filters, lookupTables, headerIndex) {
     const startYear = parseInt(event.EYEAR) || 1400;
     const endYear = parseInt(event.LYEAR) || 1600;
     
+    // Debug first few events
+    const shouldDebug = Math.random() < 0.01; // Debug ~1% of events
+    if (shouldDebug) {
+      console.log('filterHelpers date check:', {
+        EVID: event.EVID,
+        EYEAR: event.EYEAR,
+        LYEAR: event.LYEAR,
+        startYear,
+        endYear,
+        dateRangeMin: dateRange.min,
+        dateRangeMax: dateRange.max,
+        passes: !(endYear < dateRange.min || startYear > dateRange.max)
+      });
+    }
+    
     if (endYear < dateRange.min || startYear > dateRange.max) {
       return false;
     }
@@ -69,31 +84,42 @@ export function applyFilters(events, filters, lookupTables, headerIndex) {
 
 // Check if event matches search text
 function matchesSearchText(event, searchText, lookupTables) {
-  const regex = new RegExp(searchText, 'i');
+  // Clean and normalize search text: remove punctuation and convert to lowercase
+  const cleanSearchText = searchText.toLowerCase().replace(/[^\w\s]/g, ' ').trim();
+  if (!cleanSearchText) return true;
+  
+  // Split into individual words for word-based matching
+  const searchWords = cleanSearchText.split(/\s+/).filter(word => word.length > 0);
   
   // Get person name
   const personInfo = getPersonInfoForFilter(event.BIOID, lookupTables);
   const personName = personInfo?.name || '';
   
-  // Get location name
-  const locationInfo = lookupTables.Locations?.[event.LOCID]; // FIXED: use LOCID!
+  // Get location name and city
+  const locationInfo = lookupTables.Locations?.[event.LOCID];
   const locationName = locationInfo?.LOCNAME || '';
+  const cityName = locationInfo?.CITY || '';
   
   // Get aliases
   const aliases = personInfo?.aliases?.join(' ') || '';
   
-  // Build searchable text
+  // Get event description (check both Description and EINFO fields for compatibility)
+  const eventDescription = event.Description || event.EINFO || '';
+  
+  // Build searchable text and normalize it
   const searchableText = [
     personName,
     locationName,
-    event.EINFO || '',
+    cityName,
+    eventDescription,
     aliases,
     event.EYEAR?.toString() || '',
     event.LYEAR?.toString() || '',
-    event.DATERANGE || ''
-  ].join(' ');
+    event.DATERANGE || event['Date Range'] || ''
+  ].join(' ').toLowerCase().replace(/[^\w\s]/g, ' ');
   
-  return regex.test(searchableText);
+  // Check if all search words are found in the searchable text
+  return searchWords.every(word => searchableText.includes(word));
 }
 
 // Helper to get person info for filtering
@@ -142,39 +168,20 @@ export function generateHistogramData(events, startYear = 1400, endYear = 1590) 
     histogramData[year] = 0;
   }
   
-  // Count events by decade
+  // Count events by decade - each event counted ONCE in its earliest year's decade
   events.forEach(event => {
     const earliestYear = parseInt(event.EYEAR);
-    const latestYear = parseInt(event.LYEAR);
     
-    if (isNaN(earliestYear) || isNaN(latestYear)) return;
+    if (isNaN(earliestYear)) return;
     
-    // Clamp years to histogram range
-    const clampedEarliest = Math.max(startYear, earliestYear);
-    const clampedLatest = Math.min(endYear, latestYear);
+    // Find which decade bucket this event belongs to based on earliest year
+    const decade = Math.floor(earliestYear / 10) * 10;
     
-    // Get all decades this event spans
-    const decades = getDecadesInRange(clampedEarliest, clampedLatest);
-    
-    decades.forEach(decade => {
-      if (histogramData[decade] !== undefined) {
-        histogramData[decade]++;
-      }
-    });
+    // Only count if the decade is within our histogram range
+    if (histogramData[decade] !== undefined) {
+      histogramData[decade]++;
+    }
   });
   
   return histogramData;
-}
-
-// Get all decades an event spans
-function getDecadesInRange(startYear, endYear) {
-  const decades = [];
-  const startDecade = Math.floor(startYear / 10) * 10;
-  const endDecade = Math.floor(endYear / 10) * 10;
-  
-  for (let decade = startDecade; decade <= endDecade; decade += 10) {
-    decades.push(decade);
-  }
-  
-  return decades;
 }

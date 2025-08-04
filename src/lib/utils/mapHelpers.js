@@ -70,8 +70,8 @@ export function createPopupContent(event, lookupTables, headerIndex) {
       <p><strong>Place:</strong> ${getLocationDisplay(locationInfo, event)} </p>
   `;
   
-  if (event.EINFO) {
-    content += `<p><strong>Description:</strong> ${event.EINFO}</p>`;
+  if (event.Description) {
+    content += `<p><strong>Description:</strong> ${event.Description}</p>`;
   }
   
   // Add archival information

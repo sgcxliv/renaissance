@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { mapData, initializeData, lookupTables } from '$lib/stores/data.js';
-  import { filters, updateDateRange, dateSliderMin, dateSliderMax } from '$lib/stores/filters.js';
+  import { filters, updateDateRange } from '$lib/stores/filters.js';
   import { mapState, sidebarState, filteredEvents } from '$lib/stores/map.js';
   
   import Navbar from '$lib/components/Navigation/Navbar.svelte';
@@ -64,8 +64,8 @@
     // Get date range from actual data if available
     const events = $mapData.METADATA?.Events || [];
     if (events.length > 0) {
-      let minYear = 9999;
-      let maxYear = 0;
+      let minYear = 1600;
+      let maxYear = 1400;
       
       events.forEach(event => {
         const eyear = parseInt(event.EYEAR);
@@ -82,13 +82,8 @@
       });
       
       // Only update if we found valid years
-      if (minYear < maxYear && minYear !== 9999) {
+      if (minYear < maxYear) {
         console.log('Setting date range from data:', minYear, '-', maxYear);
-        console.log('Sample events from data:', events.slice(0, 3));
-        
-        // Don't artificially constrain the date range - use actual data bounds
-        dateSliderMin.set(minYear);
-        dateSliderMax.set(maxYear);
         filters.update(f => ({
           ...f,
           dateRange: { min: minYear, max: maxYear }
@@ -273,9 +268,8 @@
             </div>
           </div>
 
-          <!-- Timeline Slider and Histogram -->
+          <!-- Timeline Slider -->
           <div class="timeline-wrapper">
-            <Histogram />
             <DateSlider />
           </div>
 

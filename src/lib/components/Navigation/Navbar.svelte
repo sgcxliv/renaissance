@@ -3,15 +3,34 @@
   
   // Navigation items
   const navItems = [
-    { href: '/story-maps', label: 'Story Maps' },
-    { href: '/people', label: 'People' },
-    { href: '/places', label: 'Places' },
-    { href: '/events', label: 'Events' },
+    { 
+      href: '/story-maps', 
+      label: 'Story Maps',
+      dropdown: [
+        { href: '/people', label: 'People' },
+        { href: '/places', label: 'Places' },
+        { href: '/events', label: 'Events' }
+      ]
+    },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' }
   ];
   
   $: currentPath = $page.url.pathname;
+  
+  let showDropdown = false;
+  let dropdownTimeout;
+  
+  function handleMouseEnter() {
+    clearTimeout(dropdownTimeout);
+    showDropdown = true;
+  }
+  
+  function handleMouseLeave() {
+    dropdownTimeout = setTimeout(() => {
+      showDropdown = false;
+    }, 150); // Small delay to prevent flickering
+  }
 </script>
 
 <nav class="navbar">
@@ -22,14 +41,48 @@
     
     <div class="nav-links">
       {#each navItems as item}
-        <a 
-          href={item.href} 
-          class="nav-link" 
-          class:active={currentPath === item.href}
-        >
-          {item.label}
-        </a>
-        <span class="nav-separator">|</span>
+        {#if item.dropdown}
+          <div 
+            class="nav-item dropdown-container"
+            on:mouseenter={handleMouseEnter}
+            on:mouseleave={handleMouseLeave}
+          >
+            <a
+              href={item.href}
+              class="nav-link"
+              class:active={currentPath === item.href || item.dropdown.some(subItem => currentPath === subItem.href)}
+            >
+              {item.label}
+              <span class="dropdown-arrow">▼</span>
+            </a>
+            
+            {#if showDropdown}
+              <div class="dropdown-menu">
+                {#each item.dropdown as subItem}
+                  <a
+                    href={subItem.href}
+                    class="dropdown-link"
+                    class:active={currentPath === subItem.href}
+                  >
+                    {subItem.label}
+                  </a>
+                {/each}
+              </div>
+            {/if}
+          </div>
+        {:else}
+          <a
+            href={item.href}
+            class="nav-link"
+            class:active={currentPath === item.href}
+          >
+            {item.label}
+          </a>
+        {/if}
+        
+        {#if item !== navItems[navItems.length - 1]}
+          <span class="nav-separator">|</span>
+        {/if}
       {/each}
     </div>
   </div>
@@ -75,12 +128,23 @@
     gap: 0.5rem;
   }
   
+  .nav-item {
+    position: relative;
+  }
+  
+  .dropdown-container {
+    position: relative;
+  }
+  
   .nav-link {
     color: #2c2c2c;
     text-decoration: none;
     font-size: 1rem;
     padding: 0.25rem 0.5rem;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   
   .nav-link:hover {
@@ -95,13 +159,50 @@
     border-radius: 3px;
   }
   
+  .dropdown-arrow {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+  }
+  
+  .dropdown-container:hover .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #d4c4a0;
+    border: 1px solid #8b7355;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    z-index: 1000;
+    padding: 0.5rem 0;
+    margin-top: 0.25rem;
+  }
+  
+  .dropdown-link {
+    display: block;
+    color: #2c2c2c;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .dropdown-link:hover {
+    background-color: rgba(139, 115, 85, 0.15);
+  }
+  
+  .dropdown-link.active {
+    font-weight: bold;
+    background-color: rgba(139, 115, 85, 0.25);
+  }
+  
   .nav-separator {
     color: #2c2c2c;
     margin: 0 0.25rem;
-  }
-  
-  .nav-separator:last-child {
-    display: none;
   }
   
   @media (max-width: 768px) {
@@ -118,6 +219,15 @@
     .nav-links {
       flex-wrap: wrap;
       justify-content: center;
+    }
+    
+    .dropdown-menu {
+      position: static;
+      box-shadow: none;
+      border: none;
+      background-color: rgba(139, 115, 85, 0.1);
+      border-radius: 4px;
+      margin-top: 0.5rem;
     }
   }
 </style>

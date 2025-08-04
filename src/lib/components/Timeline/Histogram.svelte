@@ -1,41 +1,45 @@
 <script>
   import { filters } from '$lib/stores/filters.js';
-  import { sidebarState } from '$lib/stores/map.js';
+  import { mappableEvents } from '$lib/stores/map.js';
   import { generateHistogramData } from '$lib/utils/filterHelpers.js';
+  import { dateSliderMin, dateSliderMax } from '$lib/stores/filters.js';
 
-  const START_YEAR = 1400;
-  const END_YEAR = 1590;
   const DECADE_STEP = 10;
 
   let maxCount = 0;
   let histogramData = {};
-  let debugInfo = '';
 
-  // Reactive histogram generation with detailed debugging
+  // Use dynamic range based on actual data
+  $: START_YEAR = Math.floor(($dateSliderMin - 10) / 10) * 10;
+  $: END_YEAR = Math.ceil(($dateSliderMax + 10) / 10) * 10;
+
+  // Use mappableEvents instead of sidebarState.activeMarkers
   $: {
-    const events = $sidebarState.activeMarkers || [];
+    const events = $mappableEvents || [];
     
-    debugInfo = `
-      Events received: ${events.length}
-      Sample event: ${events.length > 0 ? JSON.stringify(events[0], null, 2) : 'None'}
-    `;
+    console.log('=== HISTOGRAM DEBUG ===');
+    console.log('Histogram processing', events.length, 'mappable events');
+    console.log('START_YEAR:', START_YEAR, 'END_YEAR:', END_YEAR);
     
-    console.log('=== Histogram Debug ===');
-    console.log('Events for histogram:', events.length);
     if (events.length > 0) {
-      console.log('Sample event:', events[0]);
-      console.log('Event structure check:');
-      console.log('- EYEAR:', events[0].EYEAR);
-      console.log('- LYEAR:', events[0].LYEAR);
-      console.log('- BIOID:', events[0].BIOID);
+      console.log('Sample events for histogram:');
+      events.slice(0, 3).forEach((event, i) => {
+        console.log(`  Event ${i}:`, {
+          EVID: event.EVID,
+          EYEAR: event.EYEAR,
+          LYEAR: event.LYEAR,
+          decade: Math.floor(parseInt(event.EYEAR) / 10) * 10,
+          Description: event.Description
+        });
+      });
     }
     
     histogramData = generateHistogramData(events, START_YEAR, END_YEAR);
     maxCount = Math.max(...Object.values(histogramData), 1);
     
-    console.log('Generated histogram data:', histogramData);
+    console.log('Histogram data (decade -> count):', histogramData);
     console.log('Max count:', maxCount);
-    console.log('======================');
+    console.log('=======================');
   }
 
   // Generate decades array for iteration
@@ -50,10 +54,10 @@
   }
 
   function getBarHeight(count) {
-    if (maxCount === 0) return '2px'; // Minimum visible height
+    if (maxCount === 0) return '1px'; // Minimum visible height
     const percentage = (count / maxCount) * 100;
-    const maxHeight = 100; // Maximum bar height in pixels
-    return `${Math.max(2, (percentage / 100) * maxHeight)}px`;
+    const maxHeight = 30; // Maximum bar height in pixels
+    return `${Math.max(1, (percentage / 100) * maxHeight)}px`;
   }
 
   function getDecadeLabel(year) {
@@ -71,139 +75,110 @@
 </script>
 
 <div class="histogram-container">
-  <h3>Events by Decade</h3>
+  <div class="histogram-wrapper">
+    {#each decades as decade}
+      <div 
+        class="histogram-bar"
+        style="height: {getBarHeight(histogramData[decade] || 0)};"
+        title="{histogramData[decade] || 0} events in {getDecadeLabel(decade)}"
+        on:click={() => handleBarClick(decade)}
+        on:keydown={(e) => e.key === 'Enter' && handleBarClick(decade)}
+        role="button"
+        tabindex="0"
+      >
+        <div class="count-label">
+          {histogramData[decade] || 0}
+        </div>
+      </div>
+    {/each}
+  </div>
   
-  <!-- Detailed debug section -->
-  <details style="margin-bottom: 1rem; background: #f5f5f5; padding: 10px;">
-    <summary style="cursor: pointer; font-weight: bold;">Debug Info (click to expand)</summary>
-    <pre style="font-size: 11px; overflow: auto;">{debugInfo}</pre>
-    <p><strong>Histogram Data:</strong></p>
-    <pre style="font-size: 11px;">{JSON.stringify(histogramData, null, 2)}</pre>
-  </details>
-  
-  <table class="histogram">
-    <tbody>
-      <tr>
-        {#each decades as decade}
-          <td>
-            <div 
-              class="count"
-              style="height: {getBarHeight(histogramData[decade] || 0)};"
-              title="{histogramData[decade] || 0} events in {getDecadeLabel(decade)}"
-              on:click={() => handleBarClick(decade)}
-              on:keydown={(e) => e.key === 'Enter' && handleBarClick(decade)}
-              role="button"
-              tabindex="0"
-            >
-              <div class="count-label">
-                {histogramData[decade] || 0}
-              </div>
-            </div>
-          </td>
-        {/each}
-      </tr>
-      <tr class="decade-labels">
-        {#each decades as decade}
-          <td class="decade-label">
-            {getDecadeLabel(decade)}
-          </td>
-        {/each}
-      </tr>
-    </tbody>
-  </table>
+  <div class="decade-labels">
+    {#each decades as decade}
+      <div class="decade-label">
+        {getDecadeLabel(decade)}
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style>
   .histogram-container {
     width: 100%;
-    padding: 1rem;
-    background: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1.1rem;
-    text-align: center;
-    color: #333;
-  }
-
-  .histogram {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-
-  .histogram td {
-    width: auto;
+    background: transparent;
+    border-radius: 0;
     padding: 0;
-    vertical-align: bottom;
-    text-align: center;
+    margin: 0;
   }
 
-  .count {
-    width: 100%;
-    background-color: #4a90e2;
-    color: white;
+  .histogram-wrapper {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    height: 40px;
+    margin-bottom: 3px;
+    padding: 0;
+  }
+
+  .histogram-bar {
+    flex: 1;
+    background-color: #cccccc;
+    margin: 0 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 2px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    border: 1px solid #357abd;
     position: relative;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-height: 20px;
+    border-radius: 2px 2px 0 0;
   }
 
-  .count:hover {
-    background-color: #357abd;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  .histogram-bar:hover {
+    background-color: #999999;
+    transform: translateY(-1px);
   }
 
   .count-label {
-    font-size: 10px;
+    font-size: 8px;
     font-weight: bold;
-    padding: 2px;
+    color: #333;
     position: absolute;
     bottom: 2px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    width: 100%;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
   }
 
-  .decade-labels td {
-    padding: 8px 2px 0 2px;
+  .decade-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+    margin-bottom: 5px;
   }
 
   .decade-label {
-    font-size: 11px;
-    font-weight: 500;
+    flex: 1;
+    font-size: 9px;
     color: #666;
     text-align: center;
+    margin: 0 1px;
   }
 
   /* Responsive design */
   @media (max-width: 768px) {
-    .histogram-container {
-      padding: 0.5rem;
-    }
-    
-    h3 {
-      font-size: 1rem;
-    }
-    
     .count-label {
-      font-size: 8px;
+      font-size: 7px;
     }
     
     .decade-label {
-      font-size: 9px;
+      font-size: 8px;
     }
   }
 
   @media (max-width: 480px) {
     .decade-label {
-      font-size: 8px;
+      font-size: 7px;
       writing-mode: vertical-rl;
       text-orientation: mixed;
     }

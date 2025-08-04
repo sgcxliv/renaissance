@@ -193,9 +193,9 @@
     {formatDateWithUncertainty(event?.DATERANGE, event?.CERTEDATE || event?.CERTLDATE)}
   </div>
 
-  {#if event?.EINFO}
+  {#if event?.Description}
     <div class="detail-section">
-      <strong>Description:</strong> {event.EINFO}
+      <strong>Description:</strong> {event.Description}
       {#if event.CERTRANGE && event.CERTRANGE !== "1"}
         <span class="uncertainty">
           {event.CERTRANGE === "2" ? "?" : event.CERTRANGE === "3" ? "??" : "???"}

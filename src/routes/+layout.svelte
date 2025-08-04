@@ -62,14 +62,10 @@
           return undefined;
         }
         metadata.Events = metadata.Events.map(event => {
-          const locid = event.LOCID || getField(
-            event, "Location ID (LOC)", " Location ID (LOC)", "Location Id (LOC)"
-          );
-          const bioid = event.BIOID || getField(
-            event, "Biography ID (BCO, BMU, BNO)",
-            "Biography Musician (BMU) ID", "Biography Composer (BCO) ID", "Biography Nonmusician (BNO) ID"
-          );
-          const insid = event.INSID || getField(event, "Institution ID (INS)");
+          // Fix: Use the actual CSV field names directly instead of getField() which was returning empty strings
+          const locid = event.LOCID || event['Location ID (LOC)'];
+          const bioid = event.BIOID || event['Biography ID (BCO, BMU, BNO)'];
+          const insid = event.INSID || event['Institution ID (INS)'];
           return {
             ...event,
             LOCID: locid,

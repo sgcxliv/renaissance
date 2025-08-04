@@ -41,7 +41,6 @@ export function processEventForDisplay(event, lookupTables, headerIndex) {
     return null;
   }
   const coordinates = [coordsArray[0], coordsArray[1]];
-  console.log("Coordinates extracted:", coordinates, "for event", event.ID);
 
   return {
     ...event,

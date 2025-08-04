@@ -28,9 +28,45 @@ export const filteredEvents = derived(
   [mapData, filters, lookupTables],
   ([$mapData, $filters, $lookupTables]) => {
     const rawEvents = $mapData.METADATA?.Events || [];
-    if (!Array.isArray(rawEvents)) return [];
-    if (!$lookupTables || Object.keys($lookupTables).length === 0) return [];
-    return applyFilters(rawEvents, $filters, $lookupTables, {});
+    console.log('filteredEvents: rawEvents count:', rawEvents.length);
+    console.log('filteredEvents: current filters:', $filters);
+    console.log('filteredEvents: lookupTables available:', Object.keys($lookupTables));
+    
+    // Sample a few events to check their date fields
+    if (rawEvents.length > 0) {
+      console.log('filteredEvents: Sample events:');
+      for (let i = 0; i < Math.min(3, rawEvents.length); i++) {
+        const event = rawEvents[i];
+        console.log(`  Event ${i}:`, {
+          EVID: event.EVID,
+          EYEAR: event.EYEAR,
+          LYEAR: event.LYEAR,
+          BIOID: event.BIOID,
+          LOCID: event.LOCID
+        });
+      }
+    }
+    
+    if (!Array.isArray(rawEvents)) {
+      console.warn('filteredEvents: rawEvents is not an array:', rawEvents);
+      return [];
+    }
+    if (!$lookupTables || Object.keys($lookupTables).length === 0) {
+      console.warn('filteredEvents: no lookup tables available');
+      return [];
+    }
+    
+    const filtered = applyFilters(rawEvents, $filters, $lookupTables, {});
+    console.log('filteredEvents: filtered count:', filtered.length);
+    
+    if (filtered.length === 0 && rawEvents.length > 0) {
+      console.warn('filteredEvents: All events filtered out! Sample event:', rawEvents[0]);
+      console.warn('filteredEvents: Sample event BIOID:', rawEvents[0]?.BIOID);
+      console.warn('filteredEvents: Sample event EYEAR/LYEAR:', rawEvents[0]?.EYEAR, rawEvents[0]?.LYEAR);
+      console.warn('filteredEvents: Current date range filter:', $filters.dateRange);
+    }
+    
+    return filtered;
   }
 );
 
@@ -40,24 +76,42 @@ export const filteredEvents = derived(
 export const mappableEvents = derived(
   [filteredEvents, lookupTables],
   ([$filteredEvents, $lookupTables]) => {
+    console.log('mappableEvents: input filteredEvents count:', $filteredEvents?.length || 0);
+    
     if (!$filteredEvents || $filteredEvents.length === 0) {
+      console.log('mappableEvents: no filtered events available');
       return [];
     }
+    
     const mappable = $filteredEvents.map(event => {
       const location = $lookupTables.Locations?.[event.LOCID]; // Use LOCID per your sheet!
       if (!location) {
         console.warn(`No location found for event ${event.EVID} with LOCID: ${event.LOCID}`);
         return null;
       }
-      // Try to get coordinates from COORD
+      // Try to get coordinates from various possible field names
       let coordinates = null;
-      if (location.COORD) {
-        // Ex: "45.4642,9.1900"
+      
+      if (location.Coordinates) {
+        // Ex: "50.17760749704224, 3.2357382725777493"
+        const coords = location.Coordinates.split(',').map(s => Number(s.trim()));
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+          coordinates = [coords[0], coords[1]];
+        }
+      } else if (location.COORD) {
+        // Fallback to COORD field
         const coords = location.COORD.split(',').map(Number);
         if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
           coordinates = [coords[0], coords[1]];
         }
+      } else if (location['Google URL']) {
+        // Try to extract coordinates from Google Maps URL
+        console.log('Attempting to extract coordinates from Google URL for:', event.LOCID);
+        // For now, skip events without direct coordinates
+        console.warn(`No direct coordinates for location ${event.LOCID}, has Google URL:`, location['Google URL']);
+        return null;
       }
+      
       if (!coordinates) {
         console.warn(`Invalid coordinates for location ${event.LOCID}:`, location);
         return null;
@@ -70,22 +124,27 @@ export const mappableEvents = derived(
         institutionInfo: getInstitutionInfo(event, $lookupTables)
       };
     }).filter(e => e !== null);
-    console.log(`Mappable events: ${mappable.length} out of ${$filteredEvents.length} filtered events`);
+    console.log(`mappableEvents: ${mappable.length} out of ${$filteredEvents.length} filtered events have valid locations`);
     return mappable;
   }
 );
 
 console.debug('✅ filteredEvents in map.js:', filteredEvents);
 
-filteredEvents.subscribe(events => {
-  console.log('Updating sidebarState with', events.length, 'filtered events');
+// Auto-update sidebarState when mappableEvents changes using a derived store
+const sidebarUpdater = derived(mappableEvents, ($mappableEvents) => {
+  console.log('Auto-updating sidebarState with', $mappableEvents.length, 'mappable events');
   sidebarState.update(state => ({
     ...state,
-    activeMarkers: events,
-    activeEvents: events,
-    totalEvents: events.length
+    activeMarkers: $mappableEvents,
+    activeEvents: $mappableEvents,
+    totalEvents: $mappableEvents.length
   }));
+  return $mappableEvents;
 });
+
+// Subscribe to ensure the derived store runs
+sidebarUpdater.subscribe(() => {});
 
 
 /**
@@ -208,10 +267,10 @@ export const searchResults = derived(
           personInfo?.name || '',
           locationInfo?.LOCNAME || '',
           institutionInfo?.INSNAME || '',
-          event.EINFO || '',
+          event.Description || '',
           event.EYEAR || '',
           event.LYEAR || '',
-          event.DATERANGE || '',
+          event.DATERANGE || event['Date Range'] || '',
           personInfo?.aliases?.join(' ') || ''
         ].join(' ').toLowerCase()
       };

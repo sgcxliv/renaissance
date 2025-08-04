@@ -5,20 +5,24 @@
   let sliderMaxElement;
 
   const MIN_YEAR = 1400;
-  const MAX_YEAR = 1590;
+  const MAX_YEAR = 1600;
 
-  // Step 1: Don't assign $stores at top-level!
-  // Instead, use reactive statements so values track the store.
-  let minValue;
-  let maxValue;
+  // Initialize values from stores
+  let minValue = $dateSliderMin;
+  let maxValue = $dateSliderMax;
 
+  // Update local values when stores change
   $: minValue = $dateSliderMin;
   $: maxValue = $dateSliderMax;
 
-  $: {
+  // Use dynamic range for sliders based on actual data
+  $: actualMinYear = Math.min(MIN_YEAR, minValue - 10);
+  $: actualMaxYear = Math.max(MAX_YEAR, maxValue + 10);
+
+  // Update visual elements when values change
+  $: if (minValue !== undefined && maxValue !== undefined) {
     updateDateRange();
     updateSliderBackground();
-    updateFilters();
   }
 
   function updateDateRange() {
@@ -28,8 +32,8 @@
     const activeEndLabel = document.querySelector('.slider-active-label-end');
 
     if (activeStartLabel && activeEndLabel && sliderMinElement && sliderMaxElement) {
-      const minPercent = ((minValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
-      const maxPercent = ((maxValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
+      const minPercent = ((minValue - actualMinYear) / (actualMaxYear - actualMinYear)) * 100;
+      const maxPercent = ((maxValue - actualMinYear) / (actualMaxYear - actualMinYear)) * 100;
 
       activeStartLabel.style.left = `${minPercent}%`;
       activeStartLabel.textContent = minValue?.toString();
@@ -43,8 +47,8 @@
 
     const sliderTrack = document.querySelector('.slider-track');
     if (sliderTrack) {
-      const minPercent = ((minValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
-      const maxPercent = ((maxValue - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100;
+      const minPercent = ((minValue - actualMinYear) / (actualMaxYear - actualMinYear)) * 100;
+      const maxPercent = ((maxValue - actualMinYear) / (actualMaxYear - actualMinYear)) * 100;
 
       sliderTrack.style.background = `linear-gradient(
         to right,
@@ -71,58 +75,76 @@
     if (minValue >= maxValue) {
       minValue = maxValue - 1;
     }
+    updateFilters();
   }
 
   function handleMaxChange() {
     if (maxValue <= minValue) {
       maxValue = minValue + 1;
     }
+    updateFilters();
   }
 </script>
-<!-- The rest of your markup and styles remain unchanged -->
-<div class="slider-container">
-  <div class="slider-wrapper">
-    <!-- Background track -->
-    <div class="slider-track"></div>
-    <!-- Min range slider -->
-    <input 
-      bind:this={sliderMinElement}
-      type="range" 
-      min={MIN_YEAR} 
-      max={MAX_YEAR} 
-      bind:value={minValue}
-      on:input={handleMinChange}
-      class="slider slider-min"
-    />
-    <!-- Max range slider -->
-    <input 
-      bind:this={sliderMaxElement}
-      type="range" 
-      min={MIN_YEAR} 
-      max={MAX_YEAR} 
-      bind:value={maxValue}
-      on:input={handleMaxChange}
-      class="slider slider-max"
-    />
-  </div>
-  <!-- Labels -->
-  <div class="slider-active-label-container">
-    <div class="slider-active-label-start"></div>
-    <div class="slider-active-label-end"></div>
+<div class="date-slider-container">
+  <div class="slider-container">
+    <div class="slider-wrapper">
+      <!-- Background track -->
+      <div class="slider-track"></div>
+            <!-- Min range slider -->
+      <input 
+        bind:this={sliderMinElement}
+        type="range" 
+        min={actualMinYear} 
+        max={actualMaxYear} 
+        bind:value={minValue}
+        on:input={handleMinChange}
+        class="slider slider-min"
+      />
+      <!-- Max range slider -->
+      <input 
+        bind:this={sliderMaxElement}
+        type="range" 
+        min={actualMinYear} 
+        max={actualMaxYear} 
+        bind:value={maxValue}
+        on:input={handleMaxChange}
+        class="slider slider-max"
+      />
+    </div>
+    
+    <!-- Year labels at the bottom -->
+    <div class="year-labels">
+      <span class="year-label start">{actualMinYear}</span>
+      <span class="year-label end">{actualMaxYear}</span>
+    </div>
+    
+    <!-- Active range labels -->
+    <div class="slider-active-label-container">
+      <div class="slider-active-label-start"></div>
+      <div class="slider-active-label-end"></div>
+    </div>
   </div>
 </div>
 
 <style>
+  .date-slider-container {
+    width: 100%;
+    margin: 0;
+  }
+
   .slider-container {
     position: relative;
     width: 100%;
-    padding: 20px 0;
-    margin-top: -50px;
+    padding: 5px 0 30px 0;
+    background: transparent;
+    border-radius: 0;
+    margin-bottom: 0;
   }
 
   .slider-wrapper {
     position: relative;
-    width: 100%;
+    width: calc(100% - 40px);
+    margin: 0 20px;
     height: 8px;
   }
 
@@ -155,6 +177,7 @@
     background: #333;
     cursor: pointer;
     z-index: 3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .slider::-moz-range-thumb {
@@ -167,6 +190,7 @@
     cursor: pointer;
     border: none;
     z-index: 3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .slider::-webkit-slider-runnable-track {
@@ -184,9 +208,19 @@
     border: none;
   }
 
+  .year-labels {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 20px 0 20px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+
   .slider-active-label-container {
     position: relative;
-    width: 100%;
+    width: calc(100% - 40px);
+    margin: 0 20px;
     height: 30px;
     display: flex;
     justify-content: space-between;
@@ -197,14 +231,27 @@
   .slider-active-label-start,
   .slider-active-label-end {
     position: absolute;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    background-color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    top: 25px;
+    background-color: #333;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    top: -35px;
     transform: translateX(-50%);
     z-index: 4;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    white-space: nowrap;
+  }
+
+  .slider-active-label-start::after,
+  .slider-active-label-end::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border: 4px solid transparent;
+    border-top-color: #333;
   }
 </style>

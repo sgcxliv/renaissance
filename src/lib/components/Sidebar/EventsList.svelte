@@ -5,15 +5,35 @@
   let selectedEvent = null;
 
   $: visibleEvents = $sidebarState.activeMarkers || [];
+  
+  $: {
+    console.log('EventsList: sidebarState activeMarkers count:', visibleEvents.length);
+    console.log('EventsList: first few events:', visibleEvents.slice(0, 3));
+  }
 
   function selectEvent(event) {
     selectedEvent = selectedEvent?.EVID === event.EVID ? null : event;
+    // Update the sidebar state with selected event
+    sidebarState.update(state => ({
+      ...state,
+      selectedEvent: selectedEvent
+    }));
+  }
+
+  function formatEventSummary(event) {
+    const description = event.Description || '';
+    if (!description.trim()) {
+      return 'No description available';
+    }
+    const words = description.split(' ');
+    const summary = words.slice(0, 10).join(' ');
+    return summary + (words.length > 10 ? '...' : '');
   }
 
   function formatEventText(event) {
-    const dateRange = event.DATERANGE || 'Unknown date';
+    const dateRange = event.DATERANGE || event['Date Range'] || 'Unknown date';
     const personName = event.personInfo?.name || 'Unknown person';
-    const description = event.EINFO || '';
+    const description = event.Description || '';
     
     return `[${dateRange}] ${personName}: ${description}`;
   }
@@ -24,7 +44,7 @@
 </script>
 
 <div class="sidebar-content">
-  <h3>Visible Events</h3>
+  <h3>Events Shown on Map<br><span class="subtitle">(click to select event)</span></h3>
   <div class="visible-count">
     {visibleEvents.length} event{visibleEvents.length === 1 ? '' : 's'} visible
   </div>
@@ -39,37 +59,28 @@
     <p class="no-events">No events match current filters</p>
   {:else}
     <div class="events-table-container">
-      <table id="active-markers-table">
-        <thead>
-          <tr>
-            <th>Events</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each visibleEvents as event, i (event.EVID || i)}
-            <tr 
-              class="event-row"
-              class:selected={selectedEvent?.EVID === event.EVID}
-              on:click={() => selectEvent(event)}
-              on:keydown={(e) => e.key === 'Enter' && selectEvent(event)}
-              role="button"
-              tabindex="0"
-            >
-              <td>
-                <div class="event-text">
-                  {formatEventText(event)}
-                </div>
-                
-                {#if selectedEvent?.EVID === event.EVID}
-                  <div class="event-details-container">
-                    <EventDetails event={selectedEvent} />
-                  </div>
-                {/if}
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      <div class="events-list">
+        {#each visibleEvents as event, i (`${event.EVID || 'unknown'}_${i}`)}
+          <div 
+            class="event-item"
+            class:selected={selectedEvent?.EVID === event.EVID}
+            on:click={() => selectEvent(event)}
+            on:keydown={(e) => e.key === 'Enter' && selectEvent(event)}
+            role="button"
+            tabindex="0"
+          >
+            <div class="event-summary">
+              {formatEventSummary(event)}
+            </div>
+            
+            {#if selectedEvent?.EVID === event.EVID}
+              <div class="event-details-container">
+                <EventDetails event={selectedEvent} />
+              </div>
+            {/if}
+          </div>
+        {/each}
+      </div>
     </div>
   {/if}
 </div>
@@ -87,6 +98,12 @@
     color: #333;
     border-bottom: 1px solid #ddd;
     padding-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #666;
   }
 
   .visible-count {
@@ -110,51 +127,35 @@
     overflow-y: auto;
   }
 
-  #active-markers-table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
-  #active-markers-table th {
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 8px 5px;
-    background-color: #f4f4f4;
-    border-bottom: 1px solid #ccc;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .event-row {
+  .event-item {
     cursor: pointer;
     transition: background-color 0.2s;
+    padding: 0.75rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: white;
   }
 
-  .event-row:hover {
+  .event-item:hover {
     background-color: #f5f5f5;
   }
 
-  .event-row.selected {
+  .event-item.selected {
     background-color: #e3f2fd;
+    border-color: #2196f3;
   }
 
-  #active-markers-table td {
-    text-align: left;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-    font-size: 12px;
-    padding: 6px 8px;
-    white-space: pre-wrap;
-    vertical-align: top;
-    border-bottom: 1px solid #eee;
-  }
-
-  .event-text {
+  .event-summary {
     line-height: 1.4;
     margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #333;
   }
 
   .event-details-container {
@@ -172,9 +173,9 @@
       padding: 0.5rem;
     }
     
-    #active-markers-table td {
-      font-size: 11px;
-      padding: 4px 6px;
+    .event-item {
+      padding: 0.5rem;
+      font-size: 0.9rem;
     }
   }
 </style>

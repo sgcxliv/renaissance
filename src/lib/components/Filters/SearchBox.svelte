@@ -33,8 +33,14 @@
       return;
     }
 
+    // Clean query for better matching
+    const cleanQuery = query.toLowerCase().replace(/[^\w\s]/g, ' ').trim();
+    if (!cleanQuery) {
+      hideAutocomplete();
+      return;
+    }
+
     const results = [];
-    const regex = new RegExp(query, 'i');
     const seen = new Set();
 
     // Search through people
@@ -45,20 +51,22 @@
                          sheet === 'Bio_Musicians' ? 'BMUNAME' : 'BNONAME';
         const aliasField = 'ALIAS';
         
-        const name = person[nameField];
-        const aliases = person[aliasField];
+        const name = person[nameField] || '';
+        const aliases = person[aliasField] || '';
         
-        if (name && regex.test(name) && !seen.has(name)) {
+        // Check name match (case-insensitive, partial word matching)
+        if (name && name.toLowerCase().includes(cleanQuery) && !seen.has(name.toLowerCase())) {
           results.push({ type: 'person', name, sheet });
-          seen.add(name);
+          seen.add(name.toLowerCase());
         }
         
+        // Check aliases
         if (aliases) {
           const aliasArray = aliases.includes(';') ? aliases.split(/\s*;\s*/) : [aliases];
           aliasArray.forEach(alias => {
-            if (alias && regex.test(alias) && !seen.has(alias)) {
+            if (alias && alias.toLowerCase().includes(cleanQuery) && !seen.has(alias.toLowerCase())) {
               results.push({ type: 'person', name: alias, sheet });
-              seen.add(alias);
+              seen.add(alias.toLowerCase());
             }
           });
         }
@@ -68,17 +76,33 @@
     // Search through locations
     const locations = $lookupTables.Locations || {};
     Object.values(locations).forEach(location => {
-      const name = location.LOCNAME;
-      const city = location.CITY;
+      const name = location.LOCNAME || '';
+      const city = location.CITY || '';
       
-      if (name && regex.test(name) && !seen.has(name)) {
+      if (name && name.toLowerCase().includes(cleanQuery) && !seen.has(name.toLowerCase())) {
         results.push({ type: 'location', name });
-        seen.add(name);
+        seen.add(name.toLowerCase());
       }
       
-      if (city && regex.test(city) && !seen.has(city)) {
+      if (city && city.toLowerCase().includes(cleanQuery) && !seen.has(city.toLowerCase())) {
         results.push({ type: 'location', name: city });
-        seen.add(city);
+        seen.add(city.toLowerCase());
+      }
+    });
+
+    // Search through events for description terms
+    const events = $mapData.METADATA?.Events || [];
+    events.forEach(event => {
+      const description = event.EINFO || event.Description || '';
+      if (description && description.toLowerCase().includes(cleanQuery)) {
+        // Extract a short snippet for display
+        const words = description.split(' ');
+        const snippet = words.slice(0, 5).join(' ') + (words.length > 5 ? '...' : '');
+        const key = `event-${snippet.toLowerCase()}`;
+        if (!seen.has(key)) {
+          results.push({ type: 'event', name: snippet });
+          seen.add(key);
+        }
       }
     });
 
@@ -155,30 +179,40 @@
 <style>
   .search-bar {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
     position: relative;
-    flex: 1;
+    width: 100%;
   }
 
   .search-bar input[type="text"] {
-    flex-grow: 1;
+    width: 100%;
     padding: 12px 20px 12px 40px;
-    border: 1px solid #ddd;
+    border: 1px solid #8b7355;
     font-size: 16px;
     background-image: url('/images/searchicon.png');
     background-position: 10px 12px;
     background-repeat: no-repeat;
     box-sizing: border-box;
-    width: 100%;
     border-radius: 4px;
+    font-family: 'Times New Roman', serif;
+    background-color: white;
+  }
+
+  .search-bar input[type="text"]:focus {
+    outline: none;
+    border-color: #2c2c2c;
+    box-shadow: 0 0 0 2px rgba(44, 44, 44, 0.1);
   }
 
   #search-count {
-    font-size: 16px;
-    margin-left: 10px;
-    padding: 12px;
-    white-space: nowrap;
+    font-size: 14px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+    color: #666;
+    text-align: center;
+    border: 1px solid #ddd;
   }
 
   .autocomplete-results {
@@ -187,7 +221,7 @@
     left: 0;
     right: 0;
     background: white;
-    border: 1px solid #ccc;
+    border: 1px solid #8b7355;
     max-height: 200px;
     overflow-y: auto;
     z-index: 1000;
@@ -220,15 +254,8 @@
   }
 
   @media (max-width: 768px) {
-    .search-bar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
     #search-count {
-      margin-left: 0;
-      text-align: center;
-      font-size: 14px;
+      font-size: 12px;
     }
   }
 </style>
