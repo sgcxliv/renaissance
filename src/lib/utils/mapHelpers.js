@@ -63,15 +63,21 @@ export function createPopupContent(event, lookupTables, headerIndex) {
   
   if (!locationInfo) return '';
   
-  // Use location name as the title instead of person name
+  // Use location name as the title (bold)
   const locationDisplay = getLocationDisplay(locationInfo, event);
   
   let content = `
     <div class="popup-content">
-      <h3>${locationDisplay}</h3>
+      <h3><strong>${locationDisplay}</strong></h3>
       <p><strong>Date:</strong> ${event.DATERANGE || 'Unknown'}</p>
   `;
   
+  // Add person information if available
+  if (personInfo && personInfo.name) {
+    content += `<p><strong>Person:</strong> ${personInfo.name}</p>`;
+  }
+  
+  // Add description if available
   if (event.Description) {
     content += `<p><strong>Description:</strong> ${event.Description}</p>`;
   }
@@ -88,18 +94,7 @@ export function createPopupContent(event, lookupTables, headerIndex) {
     content += `<p><strong>Bibliography:</strong> ${bibliography}</p>`;
   }
   
-  // Add share link
-  const shareID = event.EVID?.slice(3);
-  if (shareID) {
-    content += `
-      <p>
-        <a href="#" onclick="sharePoint('${shareID}')" class="share-link">
-          <img src="/images/share_24.svg" alt="Share" style="height: 16px; width: 16px; margin-right: 5px;">
-          Copy link
-        </a>
-      </p>
-    `;
-  }
+  // Remove the copy link functionality completely
   
   content += `</div>`;
   return content;

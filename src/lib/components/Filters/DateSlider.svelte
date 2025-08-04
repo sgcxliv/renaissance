@@ -130,7 +130,7 @@
 <style>
   .date-slider-container {
     width: 100%;
-    margin: 0;
+    margin: 0.5rem 0; /* Added margin for better spacing */
   }
 
   .slider-container {

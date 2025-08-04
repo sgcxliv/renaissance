@@ -95,8 +95,8 @@
     width: 100%;
     background: transparent;
     border-radius: 0;
-    padding: 0;
-    margin: 0 0 0.25rem 0; /* Reduced bottom margin */
+    padding: 0.5rem 0; /* Added vertical padding for better spacing */
+    margin: 0.25rem 0; /* Centered margin */
   }
 
   .histogram-wrapper {

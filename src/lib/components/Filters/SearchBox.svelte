@@ -154,10 +154,6 @@
     }}
   />
   
-  <div id="search-count">
-    [{$totalMarkers} {$totalMarkers === 1 ? "event" : "events"}, of which {$searchCount} are visible]
-  </div>
-
   {#if showAutocomplete}
     <div id="autocomplete-results" class="autocomplete-results">
       {#each autocompleteResults as item}

@@ -6,22 +6,11 @@
 	export let archive = '';
 	export let bibliography = '';
 	export let eventId = '';
-	
-	function sharePoint() {
-		const shareId = eventId.replace('EV:', '');
-		const shareURL = `${window.location.origin}/?eventid=${shareId}`;
-		navigator.clipboard.writeText(shareURL);
-		
-		// Show a brief confirmation (optional)
-		alert('Link copied to clipboard!');
-	}
 </script>
 
 <div class="popup-content">
-	{#if person}
-	<div class="popup-field">
-		<strong>Person:</strong> {person}
-	</div>
+	{#if place}
+	<h3><strong>{place}</strong></h3>
 	{/if}
 	
 	{#if date}
@@ -30,9 +19,9 @@
 	</div>
 	{/if}
 	
-	{#if place}
+	{#if person}
 	<div class="popup-field">
-		<strong>Place:</strong> {place}
+		<strong>Person:</strong> {person}
 	</div>
 	{/if}
 	
@@ -53,13 +42,6 @@
 		<strong>Bibliography:</strong> {@html bibliography}
 	</div>
 	{/if}
-	
-	<div class="popup-actions">
-		<button class="share-button" on:click={sharePoint}>
-			<img src="/images/share_24.svg" alt="Share" />
-			<span>Copy link</span>
-		</button>
-	</div>
 </div>
 
 <style>
@@ -68,38 +50,17 @@
 		line-height: 1.4;
 	}
 	
+	.popup-content h3 {
+		margin: 0 0 0.5rem 0;
+		color: #333;
+		font-size: 1.1rem;
+	}
+	
 	.popup-field {
 		margin-bottom: var(--spacing-sm);
 	}
 	
 	.popup-field strong {
 		color: var(--primary-color);
-	}
-	
-	.popup-actions {
-		margin-top: var(--spacing-md);
-		padding-top: var(--spacing-sm);
-		border-top: 1px solid var(--border-color);
-	}
-	
-	.share-button {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-xs);
-		background: none;
-		border: none;
-		cursor: pointer;
-		color: var(--text-color);
-		font-size: var(--font-sm);
-		padding: 0;
-	}
-	
-	.share-button:hover {
-		color: var(--primary-color);
-	}
-	
-	.share-button img {
-		width: 16px;
-		height: 16px;
 	}
 </style>

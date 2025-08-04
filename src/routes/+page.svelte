@@ -180,7 +180,7 @@
         </div>
       </div>
 
-      <!-- Search Bar Above Map -->
+      <!-- Search Bar Above Map (floating without container) -->
       <div class="search-section-main">
         <SearchBox />
       </div>
@@ -306,11 +306,8 @@
   }
 
   .search-section-main {
-    background-color: #d4c4a0;
-    padding: 0.75rem;
     margin: 0 1rem 1rem 1rem;
-    border: 2px solid #8b7355;
-    border-radius: 4px;
+    /* Removed background-color, padding, border, and border-radius to let search bar float */
   }
 
   .main-grid {
@@ -363,12 +360,16 @@
   }
 
   .timeline-wrapper {
-    padding: 0.25rem 0.75rem; /* Further reduced vertical padding */
+    padding: 0.75rem; /* Increased padding to center better */
     background-color: #f0ede5;
     border-top: 1px solid #8b7355;
     flex-shrink: 0;
     position: relative;
     z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center the timeline content */
+    min-height: 120px; /* Ensure adequate space for the timeline */
   }
 
   .legend-wrapper {
