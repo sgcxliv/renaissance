@@ -2,6 +2,7 @@
 	export let person = '';
 	export let date = '';
 	export let place = '';
+	export let location = '';
 	export let description = '';
 	export let archive = '';
 	export let bibliography = '';
@@ -9,9 +10,7 @@
 </script>
 
 <div class="popup-content">
-	{#if place}
-	<h3><strong>{place}</strong></h3>
-	{/if}
+	<h2 class="popup-title">{location || place || 'undefined'}</h2>
 	
 	{#if date}
 	<div class="popup-field">
@@ -48,6 +47,13 @@
 	.popup-content {
 		max-width: 300px;
 		line-height: 1.4;
+	}
+	
+	.popup-title {
+		margin: 0 0 0.75rem 0;
+		color: #333;
+		font-size: 1.3rem;
+		font-weight: bold;
 	}
 	
 	.popup-content h3 {
