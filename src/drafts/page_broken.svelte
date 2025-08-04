@@ -278,7 +278,7 @@
           <!-- Metadata Bar - Moved below map -->
           <div class="metadata-bar">
             <span class="metadata-text">
-              Metadata: {$sidebarState.totalEvents || 0} Events visible, 
+              Metadata: {$sidebarState.totalEvents || 0} Events, 
               {$filters.dateRange?.min || 1400} - {$filters.dateRange?.max || 1600} period selected
             </span>
             <div class="zoom-controls">

@@ -146,6 +146,17 @@
       filterAndUpdateMarkers($filters);
     });
 
+    // Clear selection when clicking on empty map areas
+    map.on('click', function(e) {
+      // Only clear if not clicking on a marker
+      if (!e.originalEvent.defaultPrevented) {
+        sidebarState.update(state => ({
+          ...state,
+          selectedEvent: null
+        }));
+      }
+    });
+
     markerCluster.on('clusterclick', function(event) {
       const clusterMarkers = event.layer.getAllChildMarkers();
       updateSidebarWithClusterMarkers(clusterMarkers);
@@ -271,9 +282,29 @@
       }
       const coordinates = [coordsArray[0], coordsArray[1]];
 
-      // Actually create marker (use markerCluster if you use it)
-      const marker = L.marker(coordinates);
-      markerCluster.addLayer(marker); // or marker.addTo(map) if not using clusters
+      // Create proper marker with styling and popup
+      const marker = createMarker(event, coordinates);
+      
+      // Add event data to marker for reference
+      marker.eventData = event;
+      
+      // Create popup content
+      const popupContent = createPopupContent(event, $lookupTables, $headerIndex);
+      if (popupContent) {
+        marker.bindPopup(popupContent);
+      }
+      
+      // Add click handler to update sidebar selection
+      marker.on('click', function(e) {
+        // Prevent map click event from firing
+        e.originalEvent.preventDefault();
+        sidebarState.update(state => ({
+          ...state,
+          selectedEvent: event
+        }));
+      });
+      
+      newMarkers.push(marker);
     });
 
     // Add markers to cluster

@@ -55,7 +55,7 @@
   function getBarHeight(count) {
     if (maxCount === 0) return '1px'; // Minimum visible height
     const percentage = (count / maxCount) * 100;
-    const maxHeight = 30; // Maximum bar height in pixels
+    const maxHeight = 50; // Maximum bar height in pixels - you can adjust this value
     return `${Math.max(1, (percentage / 100) * maxHeight)}px`;
   }
 
@@ -103,7 +103,7 @@
     display: flex;
     align-items: end;
     justify-content: space-between;
-    height: 40px;
+    height: 60px; /* You can adjust this value to make the histogram taller */
     margin-bottom: 3px;
     padding: 0;
   }

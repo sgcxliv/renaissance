@@ -189,77 +189,7 @@
       <div class="main-grid">
         <!-- Left Sidebar -->
         <div class="left-sidebar">
-          <!-- Events List at Rest -->
-          <div class="events-list-section">
-            <EventsList />
-          </div>
-
-          <!-- About/Source Tabs - Only show when item selected -->
-          <div class="info-tabs" class:hidden={!$sidebarState.selectedEvent}>
-            <div class="tab-buttons">
-              <button class="tab-btn active">About</button>
-              <button class="tab-btn">Source</button>
-            </div>
-            <div class="tab-note">
-              Two tabs: source has images of primary-source documents
-            </div>
-          </div>
-
-          <!-- Selected Item Details - Only show when item selected -->
-          {#if $sidebarState.selectedEvent}
-            <!-- Pop-up Info -->
-            <div class="popup-section">
-              <div class="popup-header">
-                {$sidebarState.selectedEvent.personInfo?.name || 'Selected Event'}
-              </div>
-            </div>
-
-            <!-- Media Sections - Only show if media exists -->
-            {#if $sidebarState.selectedEvent.hasMedia}
-              <div class="media-grid">
-                <div class="picture-section">
-                  <h4>Picture of figure/video</h4>
-                  <p>Clicking the image/video enlarges it to full-screen</p>
-                </div>
-                
-                <div class="short-blurb">
-                  <p><em>{$sidebarState.selectedEvent.EINFO || 'Short description...'}</em></p>
-                  <div class="story-link">link to full story map page if there is one</div>
-                </div>
-              </div>
-            {:else}
-              <!-- Just the blurb when no media -->
-              <div class="short-blurb">
-                <p><em>{$sidebarState.selectedEvent.EINFO || 'Short description...'}</em></p>
-                <div class="story-link">link to full story map page if there is one</div>
-              </div>
-            {/if}
-
-            <!-- Audio Element - Only show if audio exists -->
-            {#if $sidebarState.selectedEvent.hasAudio}
-              <div class="audio-section">
-                <h4>Audio element</h4>
-                <div class="audio-controls">
-                  <button class="audio-btn">◀</button>
-                  <button class="audio-btn play-btn">▶</button>
-                  <button class="audio-btn">▶▶</button>
-                </div>
-              </div>
-            {/if}
-
-            <!-- Related Events -->
-            <div class="related-section">
-              <h4>Related Events/Suggestions:</h4>
-              <div class="suggestions">
-                <div class="suggestion-category">
-                  <strong>Want to learn more:</strong>
-                  <div class="suggestion-item">Person 1 (Direct link to pop up)</div>
-                  <div class="suggestion-item">Event 1 (Direct link to pop up)</div>
-                  <div class="suggestion-item">Place 1 (Direct link to pop up)</div>
-                </div>
-              </div>
-            </div>
-          {/if}
+          <EventsList />
         </div>
 
         <!-- Main Map Area -->
@@ -277,14 +207,6 @@
           <div class="timeline-wrapper">
             <Histogram />
             <DateSlider />
-          </div>
-
-          <!-- Metadata Bar - Moved below map -->
-          <div class="metadata-bar">
-            <span class="metadata-text">Metadata: {$filteredEvents?.length || 0} Events visible, time period selected</span>
-            <div class="zoom-controls">
-              <span>Zoom in<br>out/map<br>controls</span>
-            </div>
           </div>
 
           <!-- Map Legend -->
@@ -393,9 +315,9 @@
 
   .main-grid {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 1rem;
-    margin: 1rem;
+    grid-template-columns: 300px 1fr;
+    gap: 0.5rem;
+    margin: 0.75rem;
     flex: 1;
     min-height: 0;
   }
@@ -404,179 +326,9 @@
   .left-sidebar {
     background-color: #f0ede5;
     border: 2px solid #8b7355;
-    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    overflow-y: auto;
-  }
-
-  .events-list-section {
-    background-color: white;
-    border: 1px solid #8b7355;
-    border-radius: 4px;
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  .info-tabs {
-    background-color: white;
-    border: 1px solid #8b7355;
-    border-radius: 4px;
-  }
-
-  .tab-buttons {
-    display: flex;
-    border-bottom: 1px solid #8b7355;
-  }
-
-  .tab-btn {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    background-color: #f5f5f0;
-    cursor: pointer;
-    border-right: 1px solid #8b7355;
-  }
-
-  .tab-btn:last-child {
-    border-right: none;
-  }
-
-  .tab-btn.active {
-    background-color: #8b4513;
-    color: white;
-  }
-
-  .tab-note {
-    padding: 0.75rem;
-    font-size: 0.85rem;
-    color: #555;
-  }
-
-  .popup-section {
-    background-color: #e8dcc0;
-    border: 1px solid #8b7355;
-    padding: 0.75rem;
-    border-radius: 4px;
-  }
-
-  .popup-header {
-    font-weight: bold;
-    color: #2c2c2c;
-    text-align: center;
-  }
-
-  .media-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  .picture-section {
-    background-color: white;
-    border: 1px solid #8b7355;
-    padding: 0.75rem;
-    border-radius: 4px;
-    text-align: center;
-  }
-
-  .picture-section h4 {
-    margin: 0 0 0.5rem 0;
-    color: #2c2c2c;
-    font-size: 1rem;
-  }
-
-  .picture-section p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #555;
-    line-height: 1.4;
-  }
-
-  .short-blurb {
-    background-color: white;
-    border: 1px solid #8b7355;
-    padding: 0.75rem;
-    border-radius: 4px;
-  }
-
-  .short-blurb p {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.85rem;
-    line-height: 1.4;
-    color: #333;
-  }
-
-  .story-link {
-    font-size: 0.8rem;
-    color: #0066cc;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
-  .audio-section {
-    background-color: white;
-    border: 1px solid #8b7355;
-    padding: 0.75rem;
-    border-radius: 4px;
-  }
-
-  .audio-section h4 {
-    margin: 0 0 0.5rem 0;
-    color: #2c2c2c;
-    font-size: 1rem;
-  }
-
-  .audio-controls {
-    display: flex;
-    justify-content: center;
-    gap: 0.25rem;
-    background-color: #8b4513;
-    padding: 0.5rem;
-    border-radius: 4px;
-  }
-
-  .audio-btn {
-    background: white;
-    border: 1px solid #333;
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    font-size: 0.8rem;
-  }
-
-  .play-btn {
-    background-color: #f0f0f0;
-  }
-
-  .related-section {
-    background-color: white;
-    border: 1px solid #8b7355;
-    padding: 0.75rem;
-    border-radius: 4px;
-  }
-
-  .related-section h4 {
-    margin: 0 0 0.75rem 0;
-    color: #2c2c2c;
-    font-size: 1rem;
-  }
-
-  .suggestion-category {
-    margin-bottom: 0.5rem;
-  }
-
-  .suggestion-item {
-    margin-left: 1rem;
-    margin-bottom: 0.25rem;
-    font-size: 0.9rem;
-    color: #0066cc;
-    cursor: pointer;
-    text-decoration: underline;
+    overflow: hidden;
   }
 
   /* Map Area Styles */
@@ -586,30 +338,6 @@
     display: flex;
     flex-direction: column;
     overflow: visible;
-  }
-
-  .metadata-bar {
-    background-color: #d4c4a0;
-    padding: 0.75rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #8b7355;
-  }
-
-  .metadata-text {
-    font-weight: bold;
-    color: #2c2c2c;
-  }
-
-  .zoom-controls {
-    background-color: white;
-    border: 1px solid #333;
-    padding: 0.5rem;
-    font-size: 0.7rem;
-    line-height: 1.2;
-    text-align: center;
-    min-width: 80px;
   }
 
   .map-wrapper {
@@ -635,7 +363,7 @@
   }
 
   .timeline-wrapper {
-    padding: 0.75rem;
+    padding: 1rem 0.75rem; /* Increase vertical padding to make the area taller */
     background-color: #f0ede5;
     border-top: 1px solid #8b7355;
     flex-shrink: 0;

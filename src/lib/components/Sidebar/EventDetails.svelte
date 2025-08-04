@@ -10,65 +10,56 @@
   $: archivalInfo = getArchivalInfo(event?.DOEID);
   $: bibliographyInfo = getBibliographyInfo(event?.BIBID, event?.BIBPAGES);
 
-  function getPersonInfo(bioid) {
-    if (!bioid || !$lookupTables) return null;
-    
-    const type = bioid.substring(0, 3);
-    let person = null;
-    let nameField = '';
-    let aliasField = 'ALIAS';
-    
-    if (type === "BCO") {
-      person = findInfo(bioid, "Bio_Composers", $lookupTables);
-      nameField = 'BCONAME';
-    } else if (type === "BMU") {
-      person = findInfo(bioid, "Bio_Musicians", $lookupTables);
-      nameField = 'BMUNAME';
-    } else if (type === "BNO") {
-      person = findInfo(bioid, "Bio_Nonmusicians", $lookupTables);
-      nameField = 'BNONAME';
-    }
-    
-    if (!person) return null;
-    
-    const aliases = person[aliasField]?.includes(';')
-      ? person[aliasField].split(/\s*;\s*/)
-      : [person[aliasField]].filter(Boolean);
-    
-    return {
-      name: person[nameField],
-      aliases,
-      type: type === "BCO" ? "Composer" : type === "BMU" ? "Musician" : "Non-musician"
-    };
-  }
+	function getPersonInfo(bioid) {
+		if (!bioid || !$lookupTables || !$lookupTables.bio_table) return null;
+		
+		const person = findInfo($lookupTables.bio_table, bioid);
+		if (!person) return null;
+		
+		// Try different name fields based on the bio type
+		let nameField, type;
+		if (bioid.startsWith('BCO:')) {
+			nameField = 'Composer Name';
+			type = 'Composer';
+		} else if (bioid.startsWith('BMU:')) {
+			nameField = 'Musician Name';
+			type = 'Musician';
+		} else if (bioid.startsWith('BNO:')) {
+			nameField = 'Non-musician Name';
+			type = 'Non-musician';
+		}
+		
+		const aliases = person.Alias ? [person.Alias] : [];
+		
+		return {
+			name: person[nameField] || 'Unknown',
+			type: type,
+			aliases: aliases
+		};
+	}
 
-  function getLocationInfo(locid) {
-    if (!locid || !$lookupTables) return null;
-    
-    const location = findInfo(locid, "Locations", $lookupTables);
-    if (!location) return null;
-    
-    let displayName = location.LOCNAME || '';
-    if (location.CITY) {
-      displayName += `, ${location.CITY}`;
-    }
-    if (location.COUNTRY) {
-      displayName += `, ${location.COUNTRY}`;
-    }
-    
-    // Add uncertainty markers
-    const certainty = event?.CERTLOC;
-    if (certainty && certainty !== "1") {
-      if (certainty === "2") displayName += "?";
-      else if (certainty === "3") displayName += "??";
-      else if (certainty === "4") displayName += "???";
-    }
-    
-    return {
-      ...location,
-      displayName
-    };
-  }
+	function getLocationInfo(locid) {
+		if (!locid || !$lookupTables || !$lookupTables.loc_table) return null;
+		
+		const location = findInfo($lookupTables.loc_table, locid);
+		if (!location) return null;
+		
+		let displayName = location['Name of Location'] || 'Unknown';
+		
+		// Add uncertainty markers
+		const certainty = event?.CERTLOC;
+		if (certainty && certainty !== "1") {
+			if (certainty === "2") displayName += "?";
+			else if (certainty === "3") displayName += "??";
+			else if (certainty === "4") displayName += "???";
+		}
+		
+		return {
+			name: location['Name of Location'] || 'Unknown',
+			displayName: displayName,
+			alias: location.Alias || ''
+		};
+	}
 
   function getInstitutionInfo(insid) {
     if (!insid || !$lookupTables) return null;
@@ -151,34 +142,17 @@
     
     return display;
   }
-
-  function copyShareLink() {
-    const eventId = event?.EVID?.slice(3); // Remove "EV:" prefix
-    if (!eventId) return;
-    
-    const shareURL = `${window.location.origin}/?eventid=${eventId}`;
-    
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareURL).then(() => {
-        console.log('Share link copied to clipboard');
-        // You could show a toast notification here
-      }).catch(err => {
-        console.error('Failed to copy link: ', err);
-      });
-    }
-  }
 </script>
 
 <div class="event-details">
   {#if personInfo}
     <div class="detail-section">
-      <strong>Person:</strong> {personInfo.name}
+      <strong>Person:</strong> {personInfo.name} ({personInfo.type})
       {#if personInfo.aliases.length > 0}
         <div class="aliases">
           <em>Also known as: {personInfo.aliases.join(', ')}</em>
         </div>
       {/if}
-      <div class="person-type">({personInfo.type})</div>
     </div>
   {/if}
 
@@ -193,16 +167,14 @@
     {formatDateWithUncertainty(event?.DATERANGE, event?.CERTEDATE || event?.CERTLDATE)}
   </div>
 
-  {#if event?.Description}
-    <div class="detail-section">
-      <strong>Description:</strong> {event.Description}
-      {#if event.CERTRANGE && event.CERTRANGE !== "1"}
-        <span class="uncertainty">
-          {event.CERTRANGE === "2" ? "?" : event.CERTRANGE === "3" ? "??" : "???"}
-        </span>
-      {/if}
-    </div>
-  {/if}
+  <div class="description-box">
+    {event?.Description || 'No description available'}
+    {#if event?.CERTRANGE && event.CERTRANGE !== "1"}
+      <span class="uncertainty">
+        {event.CERTRANGE === "2" ? "?" : event.CERTRANGE === "3" ? "??" : "???"}
+      </span>
+    {/if}
+  </div>
 
   {#if institutionInfo}
     <div class="detail-section">
@@ -230,17 +202,6 @@
       {/each}
     </div>
   {/if}
-
-  <div class="detail-section actions">
-    <button 
-      class="share-button" 
-      on:click={copyShareLink}
-      title="Copy share link"
-    >
-      <img src="/images/share_24.svg" alt="Share" />
-      Copy link
-    </button>
-  </div>
 </div>
 
 <style>
@@ -263,10 +224,15 @@
     margin-top: 0.25rem;
   }
 
-  .person-type {
-    font-size: 10px;
-    color: #888;
-    font-style: italic;
+  .description-box {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #333;
   }
 
   .institution-type {
@@ -292,36 +258,6 @@
     color: #444;
     margin-left: 1rem;
     margin-bottom: 0.25rem;
-  }
-
-  .actions {
-    border-top: 1px solid #eee;
-    padding-top: 0.5rem;
-    margin-top: 0.75rem;
-  }
-
-  .share-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    font-size: 10px;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    cursor: pointer;
-    color: #333;
-    text-decoration: none;
-  }
-
-  .share-button:hover {
-    background: #e0e0e0;
-    border-color: #ccc;
-  }
-
-  .share-button img {
-    width: 12px;
-    height: 12px;
   }
 
   strong {

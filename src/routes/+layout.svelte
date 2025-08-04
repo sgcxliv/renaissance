@@ -66,6 +66,10 @@
           const locid = event.LOCID || event['Location ID (LOC)'];
           const bioid = event.BIOID || event['Biography ID (BCO, BMU, BNO)'];
           const insid = event.INSID || event['Institution ID (INS)'];
+          
+          // Debug: log the raw values to understand the format
+          console.log('Raw event IDs - LOCID:', locid, 'BIOID:', bioid);
+          
           return {
             ...event,
             LOCID: locid,

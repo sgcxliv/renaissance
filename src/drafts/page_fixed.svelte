@@ -275,7 +275,7 @@
 
           <!-- Metadata Bar - Moved below map -->
           <div class="metadata-bar">
-            <span class="metadata-text">Metadata: {$filteredEvents?.length || 0} Events visible, time period selected</span>
+            <span class="metadata-text">Metadata: {$filteredEvents?.length || 0} Events, time period selected</span>
             <div class="zoom-controls">
               <span>Zoom in<br>out/map<br>controls</span>
             </div>
@@ -629,7 +629,7 @@
   }
 
   .timeline-wrapper {
-    padding: 0.75rem;
+    padding: 0.5rem;
     background-color: #f0ede5;
     border-top: 1px solid #8b7355;
     flex-shrink: 0;
