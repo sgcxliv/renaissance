@@ -6,6 +6,7 @@
   import { onMount } from 'svelte';
   import { mapData, lookupTables } from '$lib/stores/data.js';
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
   
   import Navbar from '$lib/components/Navigation/Navbar.svelte';
 
@@ -43,6 +44,33 @@
 
   let loading = true;
   let eventCounts = {};
+  
+  // Get filter from URL parameters
+  $: filterType = $page.url.searchParams.get('filter') || 'all';
+  
+  // Filter story maps based on URL parameter
+  $: filteredStoryMaps = availableStoryMaps.filter(storyMap => {
+    const hasEvents = eventCounts[storyMap.id] > 0 || storyMap.featured;
+    
+    if (!hasEvents) return false;
+    
+    if (filterType === 'all') return true;
+    if (filterType === 'people') return storyMap.type === 'Composer' || storyMap.type === 'Musician';
+    if (filterType === 'places') return storyMap.type === 'Place' || storyMap.type === 'Institution';
+    if (filterType === 'events') return storyMap.type === 'Event' || storyMap.type === 'Performance';
+    
+    return true;
+  });
+  
+  // Dynamic page title and description based on filter
+  $: pageTitle = filterType === 'people' ? 'People - Story Maps' : 
+                 filterType === 'places' ? 'Places - Story Maps' :
+                 filterType === 'events' ? 'Events - Story Maps' : 'Story Maps';
+                 
+  $: pageDescription = filterType === 'people' ? 'Interactive story maps following the journeys of Renaissance musicians and composers.' :
+                       filterType === 'places' ? 'Explore the important locations and institutions that shaped Renaissance music.' :
+                       filterType === 'events' ? 'Follow the timeline of significant musical events during the Renaissance period.' :
+                       'Interactive story maps following the journeys of Renaissance musicians, composers, and other figures.';
 
   onMount(async () => {
     loading = true;
@@ -69,26 +97,30 @@
   function openStoryMap(id) {
     goto(`/story-maps/${id}`);
   }
-
-  $: filteredStoryMaps = availableStoryMaps.filter(storyMap => 
-    eventCounts[storyMap.id] > 0 || storyMap.featured
-  );
 </script>
 
 <svelte:head>
-  <title>Story Maps - Mapping the Musical Renaissance</title>
-  <meta name="description" content="Interactive story maps following the journeys of Renaissance musicians and composers" />
+  <title>{pageTitle} - Mapping the Musical Renaissance</title>
+  <meta name="description" content={pageDescription} />
 </svelte:head>
 
 <Navbar />
 
 <div class="story-maps-container">
   <header class="page-header">
-    <h1>Story Maps</h1>
+    <h1>
+      {#if filterType === 'people'}
+        People
+      {:else if filterType === 'places'}
+        Places  
+      {:else if filterType === 'events'}
+        Events
+      {:else}
+        Story Maps
+      {/if}
+    </h1>
     <p class="page-description">
-      Story maps are focused narratives that follow the journeys of specific Renaissance musicians, 
-      composers, and other figures. Each story map provides an interactive timeline and map showing 
-      their travels, performances, and significant life events.
+      {pageDescription}
     </p>
   </header>
 

@@ -365,10 +365,10 @@
   $: if (map && mapProcessedEvents.length > 0) {
     updateMapMarkers();
     
-    // Center map on current event
+    // Pan map to current event (without changing zoom level)
     const currentMapEvent = mapProcessedEvents.find(e => e.originalIndex === currentEventIndex);
     if (currentMapEvent && currentMapEvent.coordinates) {
-      map.setView(currentMapEvent.coordinates, Math.max(map.getZoom(), 8));
+      map.panTo(currentMapEvent.coordinates);
     }
   }
 

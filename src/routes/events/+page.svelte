@@ -1,33 +1,26 @@
 <script>
-  import Navbar from '$lib/components/Navigation/Navbar.svelte';
-  import StoryMapTemplate from '$lib/components/StoryMap/StoryMapTemplate.svelte';
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+
+  onMount(() => {
+    goto('/story-maps?filter=events', { replaceState: true });
+  });
 </script>
 
 <svelte:head>
   <title>Events - Mapping the Musical Renaissance</title>
 </svelte:head>
 
-<Navbar />
-
-<main class="page-content">
-  <StoryMapTemplate 
-    title="Story Map: Key Musical Events"
-    blurbText="Follow the timeline of significant musical events during the Renaissance period. From the invention of music printing to the establishment of major musical institutions, see how events shaped the musical landscape of Europe."
-    hasAudio={true}
-    hasPicture={false}
-  />
-</main>
+<div class="loading-container">
+  <p>Loading events...</p>
+</div>
 
 <style>
-  .page-content {
-    min-height: calc(100vh - 80px);
-    background-color: #f9f7f4;
-    padding: 2rem;
-  }
-  
-  @media (max-width: 768px) {
-    .page-content {
-      padding: 1rem;
-    }
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    font-family: 'Times New Roman', serif;
   }
 </style>

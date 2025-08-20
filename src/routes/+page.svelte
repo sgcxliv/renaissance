@@ -305,7 +305,7 @@
   .banner-section {
     background-color: #f0ede5;
     border: 2px solid #8b7355;
-    margin: 1rem;
+    margin: 1rem 0.75rem;
     padding: 1.5rem;
   }
 

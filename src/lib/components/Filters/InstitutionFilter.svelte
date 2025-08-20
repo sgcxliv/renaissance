@@ -5,10 +5,8 @@
   let showPopup = false;
   let selectedInstitution = null;
   let institutionType = 'ecclesiastical';
-  let selectedCountries = new Set();
 
-  $: availableInstitutions = getAvailableInstitutions($lookupTables, institutionType, selectedCountries);
-  $: availableCountries = getAvailableCountries($lookupTables, institutionType);
+  $: availableInstitutions = getAvailableInstitutions($lookupTables, institutionType);
 
   // Debug logging
   $: {
@@ -18,7 +16,6 @@
     console.log('lookupTables.Events count:', Object.keys($lookupTables.Events || {}).length);
     console.log('lookupTables.Locations count:', Object.keys($lookupTables.Locations || {}).length);
     console.log('institutionType:', institutionType);
-    console.log('selectedCountries:', selectedCountries);
     
     if ($lookupTables.Institutions) {
       const allInstitutions = Object.values($lookupTables.Institutions);
@@ -39,9 +36,6 @@
     }
     
     console.log('availableInstitutions:', availableInstitutions.length);
-    console.log('availableCountries:', availableCountries);
-    console.log('selectedCountries size:', selectedCountries.size);
-    console.log('selectedCountries array:', Array.from(selectedCountries));
     if (availableInstitutions.length > 0) {
       console.log('Sample institutions:', availableInstitutions.slice(0, 3));
     }
@@ -71,61 +65,7 @@
     }));
   }
 
-  function toggleCountry(country) {
-    console.log('Toggling country:', country);
-    // Clear all countries first, then add only the clicked one
-    selectedCountries = new Set([country]);
-    console.log('Updated selectedCountries:', selectedCountries);
-  }
-
-  function getAvailableCountries(lookupTables, type) {
-    console.log('Getting countries for type:', type);
-    
-    // Try both lookupTables and raw METADATA for institutions
-    let institutions = [];
-    
-    if (lookupTables.Institutions) {
-      institutions = Object.values(lookupTables.Institutions);
-    } else if ($mapData.METADATA?.Institutions) {
-      institutions = $mapData.METADATA.Institutions;
-    }
-
-    if (institutions.length === 0) {
-      console.log('No institutions found for country filtering');
-      return [];
-    }
-
-    const countries = new Set();
-    const events = Object.values(lookupTables.Events || $mapData.METADATA?.Events || {});
-    const locations = lookupTables.Locations || $mapData.METADATA?.Locations || {};
-
-    console.log('Available events:', events.length);
-    console.log('Available locations:', Object.keys(locations).length);
-
-    institutions.forEach(inst => {
-      // Check different possible field names for institution type
-      const instType = inst.INSTYPE || inst['Institution Type'] || inst.Type;
-      
-      if (instType?.toLowerCase() === type.toLowerCase()) {
-        // For institutions, we need to find their associated events to get locations
-        events.forEach(event => {
-          const instId = inst.INSID || inst['Institution ID (INS)'] || inst.ID;
-          if (event.INSID === instId) {
-            const location = locations[event.LOCID];
-            if (location?.COUNTRY) {
-              countries.add(location.COUNTRY);
-            }
-          }
-        });
-      }
-    });
-
-    const countryArray = Array.from(countries).sort();
-    console.log('Found countries for', type + ':', countryArray);
-    return countryArray;
-  }
-
-  function getAvailableInstitutions(lookupTables, type, selectedCountries) {
+  function getAvailableInstitutions(lookupTables, type) {
     // Try both lookupTables and raw METADATA
     let institutions = [];
     
@@ -148,27 +88,7 @@
         const instType = inst.INSTYPE || inst['Institution Type'] || inst.Type;
         
         // Filter by institution type (ecclesiastical/political)
-        if (!instType || instType.toLowerCase() !== type.toLowerCase()) {
-          return false;
-        }
-
-        // If no countries selected, show all institutions of this type
-        if (selectedCountries.size === 0) {
-          return true;
-        }
-
-        // If countries are selected, check if institution has events in those countries
-        const events = Object.values(lookupTables.Events || $mapData.METADATA?.Events || {});
-        const hasEventsInCountry = events.some(event => {
-          const instId = inst.INSID || inst['Institution ID (INS)'] || inst.ID;
-          if (event.INSID === instId) {
-            const location = lookupTables.Locations?.[event.LOCID];
-            return location?.COUNTRY && selectedCountries.has(location.COUNTRY);
-          }
-          return false;
-        });
-
-        return hasEventsInCountry;
+        return instType && instType.toLowerCase() === type.toLowerCase();
       })
       .sort((a, b) => {
         const nameA = a.INSNAME || a['Institution Name'] || a.Name || '';
@@ -229,29 +149,6 @@
             />
             Political
           </label>
-        </div>
-      </div>
-
-      <!-- Country filter -->
-      <div class="popup-section country-section">
-        <div class="country-grid">
-          {#each availableCountries as country}
-            <div
-              class="country-item"
-              class:active={selectedCountries.has(country)}
-              on:click={() => {
-                console.log('Clicking country:', country);
-                toggleCountry(country);
-              }}
-              on:keydown={(e) => e.key === 'Enter' && toggleCountry(country)}
-              role="button"
-              tabindex="0"
-            >
-              {country}
-            </div>
-          {:else}
-            <div class="no-countries">No countries available</div>
-          {/each}
         </div>
       </div>
 
@@ -387,37 +284,6 @@
     color: white;
   }
 
-  .country-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .country-item {
-    padding: 0.5rem 1rem;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    transition: all 0.2s;
-    color: #495057;
-    min-width: 80px;
-    text-align: center;
-  }
-
-  .country-item:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-  }
-
-  .country-item.active {
-    background: #8b7355;
-    color: white;
-    border-color: #8b7355;
-  }
-
   .institution-list-container {
     max-height: 200px;
     overflow-y: auto;
@@ -443,17 +309,5 @@
 
   .institution-list li:last-child {
     border-bottom: none;
-  }
-
-  .country-section {
-    background: white;
-    border-radius: 6px;
-  }
-
-  .no-countries {
-    font-style: italic;
-    color: #6c757d;
-    text-align: center;
-    padding: 1rem;
   }
 </style>
