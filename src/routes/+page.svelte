@@ -191,16 +191,24 @@
         </div>
       </div>
 
-      <!-- Search Bar Above Map (floating without container) -->
-      <div class="search-section-main">
-        <SearchBox />
-      </div>
-
       <!-- Main Content Grid -->
       <div class="main-grid">
-        <!-- Left Sidebar -->
-        <div class="left-sidebar">
-          <EventsList />
+        <!-- Left Column: Search + Sidebar -->
+        <div class="left-column">
+          <!-- Search Bar Above Sidebar -->
+          <div class="search-section">
+            <SearchBox />
+          </div>
+          
+          <!-- Filter Controls -->
+          <div class="filters-section">
+            <PersonTypeFilter />
+            <InstitutionFilter />
+          </div>
+          <!-- Left Sidebar -->
+          <div class="left-sidebar">
+            <EventsList />
+          </div>
         </div>
 
         <!-- Main Map Area -->
@@ -208,10 +216,6 @@
           <!-- Map Container -->
           <div class="map-wrapper">
             <MapContainer />
-            <!-- Current search note -->
-            <div class="search-note">
-              *current search bar only does a direct lookup (eg. France must mention the literal string "France", but in theory should return stuff related to all French cities, events, music, people, etc.
-            </div>
           </div>
 
           <!-- Map Legend -->
@@ -293,7 +297,7 @@
   /* Landing Page Styles */
   .landing-container {
     background-color: #f5f5f0;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 60px); /* Reduced from 80px to give more space */
     display: flex;
     flex-direction: column;
   }
@@ -317,11 +321,6 @@
     color: #333;
   }
 
-  .search-section-main {
-    margin: 0 1rem 1rem 1rem;
-    /* Removed background-color, padding, border, and border-radius to let search bar float */
-  }
-
   .main-grid {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -331,6 +330,29 @@
     min-height: 0;
   }
 
+  /* Left Column Styles - Contains Search + Sidebar */
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-section {
+    background-color: #f0ede5;
+    border: 2px solid #8b7355;
+    padding: 1rem;
+    /* Same width as sidebar will be handled by the grid */
+  }
+
+  .filters-section {
+    background-color: #f0ede5;
+    border: 2px solid #8b7355;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   /* Left Sidebar Styles */
   .left-sidebar {
     background-color: #f0ede5;
@@ -338,6 +360,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    flex: 1; /* Take remaining space in left column */
+    max-height: calc(75vh - 2rem); /* Match map height minus some padding */
   }
 
   /* Map Area Styles */
@@ -353,26 +377,12 @@
     position: relative;
     flex: 1;
     min-height: 0;
-    height: 70vh;
+    height: 75vh; /* Increased from 70vh to give more space */
     overflow: visible;
   }
 
-  .search-note {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 0.75rem;
-    border: 1px solid #8b7355;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    line-height: 1.4;
-    max-width: 300px;
-    z-index: 1000;
-  }
-
   .timeline-wrapper {
-    padding: 0.75rem; /* Increased padding to center better */
+    padding: 0.75rem;
     background-color: #f0ede5;
     border-top: 1px solid #8b7355;
     flex-shrink: 0;
@@ -380,8 +390,8 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Center the timeline content */
-    min-height: 120px; /* Ensure adequate space for the timeline */
+    justify-content: center;
+    min-height: 100px; /* Reduced from 120px to save space */
   }
 
   .legend-wrapper {
@@ -513,10 +523,6 @@
       grid-template-columns: 1fr;
       gap: 1rem;
     }
-
-    .media-grid {
-      grid-template-columns: 1fr;
-    }
   }
 
   @media (max-width: 768px) {
@@ -531,12 +537,6 @@
 
     .left-sidebar {
       padding: 0.75rem;
-    }
-
-    .search-note {
-      position: static;
-      margin-top: 1rem;
-      max-width: none;
     }
 
     .legend-items {

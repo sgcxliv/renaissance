@@ -23,19 +23,6 @@
       </label>
     </div>
   {/each}
-
-  <div class="small-space"></div>
-
-  <div class="checkbox-item">
-    <input 
-      type="checkbox" 
-      id="certainty-select"
-      bind:checked={$filters.showCertainty}
-    />
-    <label for="certainty-select">
-      Show only certain dates and locations
-    </label>
-  </div>
 </div>
 
 <style>

@@ -46,6 +46,9 @@ export const filters = writable({
   showMusicians: true,
   showNonMusicians: true,
   
+  // Institution visibility
+  showInstitutions: false,
+  
   // Date range - initialize with actual data range
   dateRange: { min: 1400, max: 1600 },
   

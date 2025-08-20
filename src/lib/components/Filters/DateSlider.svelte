@@ -112,7 +112,6 @@
         class="slider slider-max"
       />
     </div>
-    
     <!-- Year labels at the bottom -->
     <div class="year-labels">
       <span class="year-label start">{actualMinYear}</span>

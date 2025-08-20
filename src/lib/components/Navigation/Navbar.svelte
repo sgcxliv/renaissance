@@ -1,5 +1,6 @@
 <script>
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   
   // Navigation items
   const navItems = [
@@ -31,12 +32,17 @@
       showDropdown = false;
     }, 150); // Small delay to prevent flickering
   }
+
+  function navigateHome(event) {
+    event.preventDefault();
+    goto('/');
+  }
 </script>
 
 <nav class="navbar">
   <div class="nav-container">
     <div class="nav-title">
-      <a href="/">Mapping the Musical Renaissance</a>
+      <a href="/" on:click={navigateHome}>Mapping the Musical Renaissance</a>
     </div>
     
     <div class="nav-links">

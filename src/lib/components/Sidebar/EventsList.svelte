@@ -36,10 +36,31 @@
   }
 
   function formatEventSummary(event) {
+    // Get person name from BIOID lookup
+    let personName = 'Unknown person';
+    if (event.BIOID && $lookupTables) {
+      const bioid = event.BIOID;
+      let person = null;
+      
+      if (bioid.startsWith('BCO:')) {
+        person = $lookupTables.Bio_Composers?.[bioid];
+        if (person) personName = person['Composer Name'] || person.BCONAME || 'Unknown composer';
+      } else if (bioid.startsWith('BMU:')) {
+        person = $lookupTables.Bio_Musicians?.[bioid];
+        if (person) personName = person['Musician Name'] || person.BMUNAME || 'Unknown musician';
+      } else if (bioid.startsWith('BNO:')) {
+        person = $lookupTables.Bio_Nonmusicians?.[bioid];
+        if (person) personName = person['Non-musician Name'] || person.BNONAME || 'Unknown non-musician';
+      }
+    }
+
+    const dateRange = event.DATERANGE || event['Date Range'] || 'Unknown date';
     const description = event.Description || '';
-    const words = description.split(' ');
-    const summary = words.slice(0, 10).join(' ');
-    return summary + (words.length > 10 ? '...' : '');
+    
+    // Format as "name of person: date, event description"
+    const summary = `${personName}: ${dateRange}, ${description}`;
+    const words = summary.split(' ');
+    return words.slice(0, 15).join(' ') + (words.length > 15 ? '...' : '');
   }
 
   function formatEventText(event) {

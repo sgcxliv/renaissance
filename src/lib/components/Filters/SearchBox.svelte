@@ -218,12 +218,14 @@
     right: 0;
     background: white;
     border: 1px solid #8b7355;
-    max-height: 200px;
+    max-height: 300px; /* Increased from 200px to allow bigger dropdown */
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 10000; /* Much higher z-index than zoom controls */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     margin-top: 2px;
+    width: 120%; /* Make dropdown wider than search bar */
+    max-width: 400px; /* Set maximum width */
   }
 
   .autocomplete-item {
