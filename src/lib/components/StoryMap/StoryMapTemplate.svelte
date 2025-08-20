@@ -540,14 +540,16 @@
           {#if config?.youtube || config?.youtubeId}
             <!-- YouTube video -->
             <div class="youtube-container">
-              <button 
-                class="youtube-thumbnail"
-                on:click={() => console.log('YouTube video clicked - implement overlay')}
-              >
-                <div class="play-overlay">▶</div>
-                <p>Click to play YouTube video</p>
-              </button>
-              <p class="media-note">YouTube: {config.youtube || config.youtubeId}</p>
+              <iframe 
+                width="300" 
+                height="180" 
+                src="https://www.youtube.com/embed/{config.youtube || config.youtubeId}"
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen
+                class="youtube-iframe"
+              ></iframe>
             </div>
           {:else if config?.video}
             <!-- Direct video file -->
@@ -829,6 +831,14 @@
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
+  }
+  
+  .youtube-iframe {
+    width: 100%;
+    max-width: 300px;
+    height: 180px;
+    border-radius: 8px;
+    border: 2px solid #8b7355;
   }
   
   .youtube-thumbnail {

@@ -27,30 +27,30 @@
       description: 'Pierre de la Rue (c. 1452 – 20 November 1518) was a Franco-Flemish composer and singer of the Renaissance. His output consists of masses, motets, and chansons. He served in the chapel of the Burgundian court and later at the court of Philip the Fair.',
       biography: 'Pierre de la Rue was one of the most important composers of the late 15th and early 16th centuries. Born around 1452, he spent much of his career in the service of the Burgundian court, where he worked alongside other prominent musicians of his time. His compositions demonstrate a masterful understanding of polyphonic techniques and represent some of the finest examples of Renaissance music.',
       timelineDates: { start: 1470, end: 1520 },
-      // Sample media - will be conditionally displayed
-      image: null, // Will show placeholder until image is added to repo
-      audio: null, // Will show when MP3 is uploaded to Supabase  
-      youtube: null // Will show when YouTube link is provided
+      // Test media content
+      image: '/images/test.png', // Using your test image
+      audio: 'https://example-audio.mp3', // Test audio placeholder - will show audio controls when Supabase is set up
+      youtube: 'sU5JZWbNt8c' // Your test YouTube video ID
     },
     'BCO:Josquin_des_Prez': {
       name: 'Josquin des Prez',
       description: 'Josquin des Prez (c. 1450-1521) was the most famous composer of the Renaissance, whose compositions are considered the pinnacle of polyphonic music.',
       biography: 'Josquin des Prez was a master of Renaissance polyphony, widely regarded as the greatest composer of his generation. His innovative use of musical techniques and expressive capabilities established new standards for sacred and secular music.',
       timelineDates: { start: 1470, end: 1521 },
-      // Example of how media would be configured:
-      image: null, // e.g., '/images/josquin_portrait.jpg' when uploaded to repo
-      audio: null, // e.g., 'https://supabase-url/josquin_motet.mp3' when uploaded
-      youtube: 'dQw4w9WgXcQ' // Example YouTube ID - will show YouTube player
+      // Test different media combinations
+      image: '/images/headshots/Bradley.jpg', // Use existing test image
+      audio: null,
+      youtube: 'K8E_zMLCRNg' // Example: Classical music performance
     },
     'BCO:Jean_Mouton': {
       name: 'Jean Mouton',
       description: 'Jean Mouton (c. 1459 – 30 October 1522) was a French composer of the Renaissance, known for his sacred music and service in the royal chapel.',
       biography: 'Jean Mouton was a prominent composer who served in the French royal chapel. His works demonstrate sophisticated polyphonic writing and contributed significantly to the development of Renaissance musical style.',
       timelineDates: { start: 1480, end: 1522 },
-      // Example of mixed media:
-      image: '/images/headshots/mouton_placeholder.jpg', // Placeholder image path
-      audio: 'https://example-supabase-url.com/mouton_chanson.mp3', // Example audio URL
-      youtube: null // No video content available
+      // Test all media types
+      image: '/images/headshots/McIntyre.jpg', // Use another existing test image
+      audio: 'https://example-mouton-audio.mp3', // Test audio placeholder
+      youtube: '6Yl_67OhO00' // Example: Renaissance music performance
     }
   };
 
