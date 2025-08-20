@@ -8,12 +8,20 @@
   // Legacy props for backwards compatibility
   export let title = config?.name || "Story Map: Institution/Person";
   export let blurbText = config?.description || `Clicking the footnotes highlights the corresponding point on the map, and clicking the point highlights the sentence in the blurb`;
-  export let pictureText = "Clicking the picture will enlarge above";
+  export let pictureText = "Click to enlarge";
   
   // Media detection - only show tabs when content is available
   $: hasImage = !!(config?.image || config?.picture);
   $: hasAudio = !!(config?.audio || config?.mp3);
   $: hasVideo = !!(config?.video || config?.youtube || config?.youtubeId);
+  
+  // Debug: Log the URLs being used
+  $: if (config) {
+    console.log('Story map config:', config);
+    console.log('Image URL:', config?.image);
+    console.log('Audio URL:', config?.audio);
+    console.log('YouTube ID:', config?.youtube);
+  }
   
   // Determine if we should show any media sections
   $: showMediaSections = hasImage || hasAudio || hasVideo;
@@ -130,7 +138,7 @@
       weight = 4;
     }
 
-    // Create dotted line
+    // Create dotted line without arrows
     const line = L.polyline([fromCoords, toCoords], {
       color: color,
       weight: weight,
@@ -138,30 +146,8 @@
       dashArray: '8, 12'
     });
 
-    // Calculate midpoint for arrow
-    const midLat = (fromCoords[0] + toCoords[0]) / 2;
-    const midLng = (fromCoords[1] + toCoords[1]) / 2;
-    
-    // Calculate bearing for arrow direction
-    const bearing = calculateBearing(fromCoords, toCoords);
-    
-    // Create arrow marker with better styling
-    const arrowIcon = L.divIcon({
-      html: `<div style="
-        transform: rotate(${bearing}deg); 
-        color: ${color.replace('rgba', 'rgb').replace(', 0.', ', 1.').replace(', 0.8)', ')')};
-        font-size: 18px; 
-        font-weight: bold;
-        text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
-      ">→</div>`,
-      className: 'movement-arrow',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
-    });
-    
-    const arrow = L.marker([midLat, midLng], { icon: arrowIcon });
-
-    return { line, arrow };
+    // Return only the line, no arrow
+    return { line, arrow: null };
   }
 
   function calculateBearing(from, to) {
@@ -180,7 +166,7 @@
     // Clear existing movement lines
     currentMovementLines.forEach(({ line, arrow }) => {
       map.removeLayer(line);
-      map.removeLayer(arrow);
+      if (arrow) map.removeLayer(arrow); // Only remove arrow if it exists
     });
     currentMovementLines = [];
 
@@ -208,7 +194,9 @@
         );
         
         map.addLayer(movement.line);
-        map.addLayer(movement.arrow);
+        if (movement.arrow) {
+          map.addLayer(movement.arrow);
+        }
         currentMovementLines.push(movement);
         
         console.log(`Added movement line ${i} -> ${i+1}`, {
@@ -517,7 +505,6 @@
             <!-- Audio from Supabase or direct file -->
             <audio controls class="audio-player">
               <source src={config.audio || config.mp3} type="audio/mpeg">
-              <source src={config.audio || config.mp3} type="audio/mp3">
               Your browser does not support the audio element.
             </audio>
           {:else}

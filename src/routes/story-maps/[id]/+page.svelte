@@ -8,12 +8,9 @@
   import { onMount } from 'svelte';
   import { mapData, lookupTables } from '$lib/stores/data.js';
   import { goto } from '$app/navigation';
-  import { getSupabaseUrl } from '$lib/supabase.js';
-
+  
   import Navbar from '$lib/components/Navigation/Navbar.svelte';
-  import StoryMapTemplate from '$lib/components/StoryMap/StoryMapTemplate.svelte';
-
-  let personId = '';
+  import StoryMapTemplate from '$lib/components/StoryMap/StoryMapTemplate.svelte';  let personId = '';
   let personData = null;
   let personEvents = [];
   let loading = true;
@@ -28,9 +25,9 @@
       description: 'Pierre de la Rue (c. 1452 – 20 November 1518) was a Franco-Flemish composer and singer of the Renaissance. His output consists of masses, motets, and chansons. He served in the chapel of the Burgundian court and later at the court of Philip the Fair.',
       biography: 'Pierre de la Rue was one of the most important composers of the late 15th and early 16th centuries. Born around 1452, he spent much of his career in the service of the Burgundian court, where he worked alongside other prominent musicians of his time. His compositions demonstrate a masterful understanding of polyphonic techniques and represent some of the finest examples of Renaissance music.',
       timelineDates: { start: 1470, end: 1520 },
-      // Real Supabase URLs with your uploaded files
-      image: getSupabaseUrl('images', 'test.png'),
-      audio: getSupabaseUrl('audio-files', 'sample.m4a'),
+      // Direct Supabase URLs with correct file names
+      image: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png',
+      audio: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3',
       youtube: 'sU5JZWbNt8c'
     },
     'BCO:Josquin_des_Prez': {
@@ -38,8 +35,8 @@
       description: 'Josquin des Prez (c. 1450-1521) was the most famous composer of the Renaissance, whose compositions are considered the pinnacle of polyphonic music.',
       biography: 'Josquin des Prez was a master of Renaissance polyphony, widely regarded as the greatest composer of his generation. His innovative use of musical techniques and expressive capabilities established new standards for sacred and secular music.',
       timelineDates: { start: 1470, end: 1521 },
-      // You can add more files as you upload them
-      image: getSupabaseUrl('images', 'josquin-portrait.jpg'), // Upload and replace with actual filename
+      // Placeholder URLs - replace with actual uploaded files
+      image: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/josquin-portrait.jpg',
       audio: null, // Add when you upload audio
       youtube: 'K8E_zMLCRNg'
     },
@@ -48,8 +45,8 @@
       description: 'Jean Mouton (c. 1459 – 30 October 1522) was a French composer of the Renaissance, known for his sacred music and service in the royal chapel.',
       biography: 'Jean Mouton was a prominent composer who served in the French royal chapel. His works demonstrate sophisticated polyphonic writing and contributed significantly to the development of Renaissance musical style.',
       timelineDates: { start: 1480, end: 1522 },
-      image: getSupabaseUrl('images', 'mouton-portrait.jpg'), // Upload and replace with actual filename
-      audio: getSupabaseUrl('audio-files', 'mouton-sample.mp3'), // Upload and replace with actual filename
+      image: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/mouton-portrait.jpg',
+      audio: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/mouton-sample.mp3',
       youtube: '6Yl_67OhO00'
     }
   };

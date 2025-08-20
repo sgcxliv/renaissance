@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase URL Test</title>
+</head>
+<body>
+    <h1>Testing Supabase URLs</h1>
+    
+    <h2>Image Test</h2>
+    <img src="https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png" 
+         alt="Test Image" 
+         style="max-width: 300px; border: 2px solid red;"
+         onerror="this.style.display='none'; document.getElementById('img-error').style.display='block';">
+    <div id="img-error" style="display:none; color:red;">Image failed to load</div>
+    
+    <h2>Audio Test</h2>
+    <audio controls id="audio-test" onloadstart="console.log('Audio load started')" oncanplay="console.log('Audio can play')" onerror="console.log('Audio error:', event)">
+        <source src="https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    
+    <h2>Browser Support Test</h2>
+    <div id="support-info"></div>
+    
+    <h2>Debug Info</h2>
+    <p>Image URL: https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png</p>
+    <p>Audio URL: https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3</p>
+    
+    <script>
+        // Test the URLs with fetch
+        const imageUrl = 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png';
+        const audioUrl = 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3';
+        
+        fetch(imageUrl)
+            .then(response => console.log('Image response:', response.status, response.statusText))
+            .catch(error => console.error('Image error:', error));
+            
+        fetch(audioUrl)
+            .then(response => console.log('Audio response:', response.status, response.statusText))
+            .catch(error => console.error('Audio error:', error));
+            
+        // Test browser audio format support
+        const audio = document.createElement('audio');
+        const supportInfo = document.getElementById('support-info');
+        supportInfo.innerHTML = `
+            <p>MP4 support: ${audio.canPlayType('audio/mp4')}</p>
+            <p>M4A support: ${audio.canPlayType('audio/x-m4a')}</p>
+            <p>AAC support: ${audio.canPlayType('audio/aac')}</p>
+            <p>MP3 support: ${audio.canPlayType('audio/mpeg')}</p>
+        `;
+    </script>
+</body>
+</html>
