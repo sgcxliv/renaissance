@@ -14,19 +14,17 @@
   let failedEvents = [];
   let initialLoadComplete = false;
 
-  // Auto-remove limiting after 3 seconds
   onMount(() => {
     setTimeout(() => {
       initialLoadComplete = true;
       console.log('Initial load period complete - removing event limiting');
-      // Trigger a re-render of markers without limitations
       if (map && markerCluster && allProcessedEvents.length > 0) {
         filterAndUpdateMarkers($filters);
       }
     }, 3000);
   });
 
-  // Utility: filter events to only those visible in map viewport
+  // filter events to only those visible in map viewport
   function filterEventsInView(events, map) {
     if (!map) return [];
     const bounds = map.getBounds();
@@ -208,7 +206,7 @@
       console.warn('Failed to process events:', failedEvents);
     }
 
-    // ==== MOVED DEBUGGING LOGS HERE ====
+    // more debugingg logs
     console.log('SAMPLE processed event:', allProcessedEvents[0]);
     if (allProcessedEvents[0]) {
       // Try multiple variants of ID as fallback
@@ -227,7 +225,7 @@
     // Clear existing markers
     markerCluster.clearLayers();
 
-    // Step 1: Filter by user filters (checkboxes, search, certainty...)
+    // Filter by user filters (checkboxes, search, certainty...)
     let filteredEvents = applyFilters(
       allProcessedEvents,
       currentFilters,
@@ -235,10 +233,10 @@
       $headerIndex
     );
 
-    // Step 2: Further filter to only events visible in current map bounds
+    // Further filter to only events visible in current map bounds
     filteredEvents = filterEventsInView(filteredEvents, map);
 
-    // Step 3: Apply initial load limiting for first 3 seconds only
+    // Apply initial load limiting for first 3 seconds only
     if (!initialLoadComplete && filteredEvents.length > 100) {
       console.log(`Initial load: limiting to 100 events (${filteredEvents.length} available)`);
       // Get map center for distance calculation
@@ -261,7 +259,7 @@
       console.log(`Post-initial load: showing all ${filteredEvents.length} events`);
     }
 
-    // Step 4: Now create markers for filtered events
+    // create markers for filtered events
     const newMarkers = [];
 
     filteredEvents.forEach(event => {

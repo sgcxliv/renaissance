@@ -66,7 +66,7 @@
   }
 
   function getAvailableInstitutions(lookupTables, type) {
-    // Try both lookupTables and raw METADATA
+    // Try both lookupTables and raw metadata
     let institutions = [];
     
     if (lookupTables.Institutions) {

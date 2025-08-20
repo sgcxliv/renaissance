@@ -15,7 +15,7 @@
     
     <h2>Audio Test</h2>
     <audio controls id="audio-test" onloadstart="console.log('Audio load started')" oncanplay="console.log('Audio can play')" onerror="console.log('Audio error:', event)">
-        <source src="https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3" type="audio/mpeg">
+        <source src="https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio/sample.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
     
@@ -24,12 +24,12 @@
     
     <h2>Debug Info</h2>
     <p>Image URL: https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png</p>
-    <p>Audio URL: https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3</p>
+    <p>Audio URL: https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio/sample.mp3</p>
     
     <script>
         // Test the URLs with fetch
         const imageUrl = 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png';
-        const audioUrl = 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3';
+        const audioUrl = 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio/sample.mp3';
         
         fetch(imageUrl)
             .then(response => console.log('Image response:', response.status, response.statusText))

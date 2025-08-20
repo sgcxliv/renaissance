@@ -15,11 +15,6 @@
 	
 	async function loadData() {
 		try {
-			// Load your data here
-			// events = await fetch('/data/Events.json').then(r => r.json());
-			// documents = await fetch('/data/Documents.json').then(r => r.json());
-			
-			// Placeholder data
 			events = [];
 			documents = [];
 		} catch (error) {

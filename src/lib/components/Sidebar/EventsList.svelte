@@ -113,25 +113,21 @@
     };
   }
 
+  // display media on main page dropdown if it exists (needs work, placeholders)
   function sanitizeEventId(eventId) {
     return eventId?.replace(/[^a-zA-Z0-9-_]/g, '_') || '';
   }
 
-  // Check if event has media (placeholder for now - you'll need to implement based on your data structure)
   function hasMedia(event) {
-    // Add logic here based on your data structure
     return false; // placeholder
   }
 
-  // Check if event has audio (placeholder for now - you'll need to implement based on your data structure)
   function hasAudio(event) {
-    // Add logic here based on your data structure
     return false; // placeholder
   }
 </script>
 
 <div class="sidebar-container">
-  <!-- Events List Section -->
   <div class="events-section" class:collapsed={selectedEvent}>
     <div class="events-header">
       <h3><strong>Events:</strong> {visibleEvents.length} Visible</h3>

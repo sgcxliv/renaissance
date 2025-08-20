@@ -25,9 +25,9 @@
       description: 'Pierre de la Rue (c. 1452 – 20 November 1518) was a Franco-Flemish composer and singer of the Renaissance. His output consists of masses, motets, and chansons. He served in the chapel of the Burgundian court and later at the court of Philip the Fair.',
       biography: 'Pierre de la Rue was one of the most important composers of the late 15th and early 16th centuries. Born around 1452, he spent much of his career in the service of the Burgundian court, where he worked alongside other prominent musicians of his time. His compositions demonstrate a masterful understanding of polyphonic techniques and represent some of the finest examples of Renaissance music.',
       timelineDates: { start: 1470, end: 1520 },
-      // Direct Supabase URLs with correct file names
+      // Direct Supabase URLs with correct bucket names
       image: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/images/Test.png',
-      audio: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio-files/sample.mp3',
+      audio: 'https://izvdeduyqozkmmiknttw.supabase.co/storage/v1/object/public/audio/sample.mp3',
       youtube: 'sU5JZWbNt8c'
     },
     'BCO:Josquin_des_Prez': {
