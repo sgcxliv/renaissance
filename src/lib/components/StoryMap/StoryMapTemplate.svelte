@@ -584,6 +584,14 @@
   </div>
 </div> <!-- Close storymap-container -->
 
+<!-- Full-width Bibliography Section -->
+<div class="bibliography-full-section">
+  <h3>Bibliography/Sources</h3>
+  <p class="bibliography-content">
+    Blurb goes here
+  </p>
+</div>
+
 
 
 <style>
@@ -979,6 +987,33 @@
     width: 20px;
     height: 20px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+  
+  /* Full-width Bibliography/Sources Section */
+  .bibliography-full-section {
+    width: 100%;
+    padding: 2rem;
+    background-color: #f0ede5;
+    border: 2px solid #8b7355;
+    border-top: none;
+    margin: 0;
+  }
+
+  .bibliography-full-section h3 {
+    margin: 0 0 1rem 0;
+    color: #2c2c2c;
+    font-size: 1.3rem;
+    text-align: center;
+    font-family: 'Times New Roman', serif;
+  }
+
+  .bibliography-content {
+    margin: 0;
+    line-height: 1.6;
+    color: #333;
+    font-style: italic;
+    text-align: center;
+    font-family: 'Times New Roman', serif;
   }
   
   @media (max-width: 768px) {
