@@ -1,3 +1,8 @@
+<!--
+Svelte component that displays a histogram visualization of historical events grouped by decades with interactive hover tooltips.
+Processes mappable events data to generate decade-based counts and renders proportional bar heights with embedded count labels.
+Features responsive design with adaptive text sizing and uses dynamic date ranges from actual loaded data.
+-->
 <script>
   import { filters, actualDateRange } from '$lib/stores/filters.js';
   import { mappableEvents } from '$lib/stores/map.js';
