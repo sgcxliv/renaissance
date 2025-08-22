@@ -1,3 +1,5 @@
+# This is necessecary to keep certain things confidential when committing to a public repo. 
+# Do not delete anything, only add if other things arise.
 node_modules
 
 # Output
