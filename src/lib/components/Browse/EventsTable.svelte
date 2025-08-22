@@ -1,3 +1,8 @@
+<!--
+ * Svelte component that displays a sortable, searchable, and paginated table of events with person, date, place, and description columns.
+ * Includes search functionality across all event fields, column sorting with date sorting by earliest year, and pagination controls.
+ * Features responsive design and handles empty states with appropriate messaging.
+-->
 <script>
     export let events = [];
     
