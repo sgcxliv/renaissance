@@ -1,3 +1,8 @@
+<!--
+Svelte component that renders a formatted popup display for map markers showing event details like location, date, person, and description.
+Accepts exported props for all event fields and conditionally displays each field only if it contains data.
+Features styled layout with primary color highlights and HTML rendering support for archive and bibliography fields.
+-->
 <script>
 	export let person = '';
 	export let date = '';
