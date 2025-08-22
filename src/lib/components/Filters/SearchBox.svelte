@@ -1,3 +1,8 @@
+<!--
+Svelte component that provides a search input with autocomplete functionality for searching people, locations, and events.
+Searches across multiple data sources (composers, musicians, non-musicians, locations, events) and displays matching results in a dropdown.
+Features keyboard navigation, click-outside handling, and real-time filtering with debounced autocomplete suggestions.
+-->
 <script>
   import { filters } from '$lib/stores/filters.js';
   import { searchResults, searchCount } from '$lib/stores/filters.js';
