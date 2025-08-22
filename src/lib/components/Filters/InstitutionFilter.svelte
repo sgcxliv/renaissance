@@ -1,8 +1,8 @@
-//
-// Svelte component that provides a dropdown filter for selecting ecclesiastical or political institutions with type toggle functionality.
-// Connects to global filter stores, dynamically loads institution data from lookup tables, and includes search/selection capabilities.
-// Features custom dropdown styling, outside-click handling, and comprehensive debug logging for data structure inspection.
-//
+<!--
+* Svelte component that provides a dropdown filter for selecting ecclesiastical or political institutions with type toggle functionality.
+* Connects to global filter stores, dynamically loads institution data from lookup tables, and includes search/selection capabilities.
+* Features custom dropdown styling, outside-click handling, and comprehensive debug logging for data structure inspection.
+-->
 <script>
   import { filters } from '$lib/stores/filters.js';
   import { mapData, lookupTables } from '$lib/stores/data.js';
