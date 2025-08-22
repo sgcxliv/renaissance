@@ -1,3 +1,8 @@
+<!--
+Svelte navigation component with dropdown menus and active state tracking based on current page URL.
+Features hover-based dropdown functionality with timeout handling and responsive design for mobile devices.
+Includes styled navigation links with separators and programmatic navigation to home page.
+-->
 <script>
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
