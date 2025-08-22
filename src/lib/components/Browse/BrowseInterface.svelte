@@ -1,3 +1,8 @@
+/**
+ * Svelte component that creates a tabbed interface for browsing between events and documents with loading states and dynamic tab content switching.
+ * Loads data on mount and displays appropriate table component based on active tab.
+ * Includes tab navigation with item counts and loading indicators.
+ */
 <script>
 	import { onMount } from 'svelte';
 	import EventsTable from './EventsTable.svelte';
