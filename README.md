@@ -114,7 +114,7 @@ Every file or folder here is a page on your website:
 
 **+layout.svelte** — The base layout shared across every page (like a frame, header/footer).
 
-**+page.svelte** — The main homepage.
+**+page.svelte** — The main homepage. This is where you will manage most of the styling for the main page. 
 
 **about/+page.svelte** — The "About" page (project background and information).
 
@@ -130,7 +130,7 @@ Every file or folder here is a page on your website:
 
 **places/+page.svelte** — Information about the places featured in the project (towns, cities, institutions).
 
-**story-maps/+page.svelte** — Interactive narrative pages, showing stories on the map.
+**story-maps/+page.svelte** — Interactive narrative pages, showing stories on the map. Here, you can see that story maps are dynamically managed, and all you have to do is add the code and unique content for the person/event/place you are trying to generate story maps for, and it will automatically generate a story map with the given media and associated events. 
 
 ## Development
 
@@ -154,3 +154,7 @@ npm test
 ## Contributing
 
 This project explores Renaissance music history through interactive digital humanities tools. Contributions are welcome for historical data, UI improvements, and new visualization features.
+
+# Linking Vercel and Supabase
+
+Deploy directly on vercel using a copy of the repository. In Vercel, go to "Settings", and you must hadd two environment variables from Supabase. Go to "Settings" in your Supabase project, and find your PUBLIC_SUPABASE_URL (your Project URL from Supabase) and PUBLIC_SUPABASE_ANON_KEY (Your public anon key), which can be found under "Data API" and "API Keys" respectively for you to copy and paste directly. In Supabase, all you have to do is create two standard public storage buckets with the "SELECT" configuration functions, one for images, one for audio, and upload content labeled correctly in their respective buckets! 
