@@ -1,3 +1,8 @@
+<!--
+Svelte component that creates a dual-handle range slider for filtering data by date range with visual feedback.
+Syncs with global filter stores and dynamically adjusts to actual data date ranges with real-time visual updates.
+Features custom styling with active range highlighting and floating labels showing current values.
+-->
 <script>
   import { filters, dateSliderMin, dateSliderMax, actualDateRange } from '$lib/stores/filters.js';
 
