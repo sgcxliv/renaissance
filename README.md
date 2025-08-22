@@ -5,12 +5,9 @@ An interactive web application for exploring Renaissance music events, documents
 ## Quick Start
 
 ```bash
-cd ~/Desktop/renaissance (or path to local directory)
 npm install
 npm run dev
 ```
-
-Then, your local address should pop up (something like http://localhost:5173/) 
 
 ## Technology Stack
 
