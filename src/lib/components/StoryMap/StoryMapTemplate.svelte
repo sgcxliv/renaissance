@@ -1,3 +1,8 @@
+<!--
+Svelte component that creates an interactive story map with synchronized timeline navigation and geographic visualization of historical events.
+Features a split-panel layout with biographical content, event navigation, and media sections alongside a Leaflet map showing movement patterns.
+Includes dynamic marker clustering, movement line visualization, and responsive design with support for images, audio, and video content.
+-->
 <script>
   // Props for dynamic story map content
   export let person;
