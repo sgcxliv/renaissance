@@ -1,3 +1,8 @@
+<!--
+ * Svelte component that displays a sortable, searchable, and paginated table of documents with filtering by type.
+ * Includes search functionality across multiple fields, column sorting, type filtering, and pagination controls.
+ * Provides responsive design and handles empty states with appropriate messaging.
+-->
 <script>
 	export let documents = [];
 	
