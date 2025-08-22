@@ -1,3 +1,4 @@
+// This helps us connect to supabase. Do not modify unless you are adding interactive media types
 import { createClient } from '@supabase/supabase-js'
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
 
