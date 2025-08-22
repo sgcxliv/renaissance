@@ -21,7 +21,6 @@
     console.log('Page mounting, initializing data...');
     
     try {
-      // Initialize data first
       await initializeData();
       dataLoaded = true;
       console.log('Data initialization complete');
@@ -33,7 +32,6 @@
     
     mounted = true;
     
-    // Initialize other components after data is loaded
     if (dataLoaded) {
       updateDateRangeFromData();
       updateSliderBackground();
@@ -41,11 +39,9 @@
     }
   });
 
-  // Check if we have critical data for basic map functionality
   $: hasCriticalData = $mapData.METADATA?.Events && $mapData.METADATA?.Locations;
   $: hasFullData = hasCriticalData && $mapData.METADATA?.Bio_Composers && $mapData.METADATA?.Bio_Musicians;
 
-  // Debug reactive statements
   $: {
     console.log('=== Page Debug ===');
     console.log('mounted:', mounted);
@@ -58,14 +54,12 @@
         } else {
         console.warn('filteredEvents not ready or not an array:', $filteredEvents);
     }
-
     console.log('sidebarState activeMarkers:', $sidebarState.activeMarkers?.length || 0);
     console.log('current filters:', $filters);
     console.log('==================');
   }
 
   function updateDateRangeFromData() {
-    // Get date range from actual data if available
     const events = $mapData.METADATA?.Events || [];
     if (events.length > 0) {
       let minYear = 9999;
@@ -85,12 +79,10 @@
         }
       });
       
-      // Only update if we found valid years
       if (minYear < maxYear && minYear !== 9999) {
         console.log('Setting date range from data:', minYear, '-', maxYear);
         console.log('Sample events from data:', events.slice(0, 3));
         
-        // Don't artificially constrain the date range - use actual data bounds
         dateSliderMin.set(minYear);
         dateSliderMax.set(maxYear);
         filters.update(f => ({
@@ -102,13 +94,10 @@
   }
 
   function updateSliderBackground() {
-    // Implementation for slider background updates
     console.log('Slider background updated');
-    // This would typically update visual elements of the date slider
   }
 
   function loadMarkerFromURL() {
-    // Load specific marker if eventid is in URL
     const urlParams = new URLSearchParams(window.location.search);
     let eventid = urlParams.get('eventid');
     
@@ -116,19 +105,16 @@
       eventid = eventid.startsWith('EV:') ? eventid : `EV:${eventid}`;
       console.log('Loading marker for event:', eventid);
       
-      // Find the event in the data
       const events = $mapData.METADATA?.Events || [];
       const targetEvent = events.find(event => event.EVID === eventid);
       
       if (targetEvent) {
         console.log('Found target event:', targetEvent);
-        // Update map state to focus on this event
         mapState.update(state => ({
           ...state,
           selectedMarker: targetEvent
         }));
         
-        // You might also want to update the sidebar to show this event
         sidebarState.update(state => ({
           ...state,
           selectedEvent: targetEvent
@@ -139,7 +125,6 @@
     }
   }
 
-  // Helper function to retry data loading
   async function retryDataLoad() {
     loadingError = null;
     dataLoaded = false;
@@ -164,7 +149,6 @@
 
 {#if mounted}
   {#if loadingError}
-    <!-- Error state -->
     <div class="error-container">
       <h2>Error Loading Data</h2>
       <p>There was a problem loading the musical data:</p>
@@ -174,16 +158,13 @@
       </button>
     </div>
   {:else if hasCriticalData}
-    <!-- Main landing page - show map with critical data loaded -->
     <div class="landing-container">
-      <!-- Show loading banner for background data -->
       {#if !hasFullData}
         <div class="partial-loading-banner">
           <span>🔄 Loading additional features...</span>
         </div>
       {/if}
       
-      <!-- Banner Section -->
       <div class="banner-section">
         <div class="banner-content">
           <h2>Banner: about the project</h2>
@@ -191,44 +172,26 @@
         </div>
       </div>
 
-      <!-- Main Content Grid -->
       <div class="main-grid">
-        <!-- Left Column: Search + Sidebar -->
         <div class="left-column">
-          <!-- Search Bar Above Sidebar -->
           <div class="search-section">
             <SearchBox />
           </div>
           
-          <!-- Filter Controls -->
           <div class="filters-section">
             <PersonTypeFilter />
             <InstitutionFilter />
           </div>
-          <!-- Left Sidebar -->
           <div class="left-sidebar">
             <EventsList />
           </div>
         </div>
 
-        <!-- Main Map Area -->
         <div class="map-area">
-          <!-- Map Container -->
           <div class="map-wrapper">
             <MapContainer />
           </div>
 
-          <!-- Map Legend -->
-          <div class="legend-wrapper">
-            <h4>General Map legend:</h4>
-            <div class="legend-items">
-              <div class="legend-item">Transparency = Confidence in event</div>
-              <div class="legend-item">Color = Composer/Musician/Non-Musician</div>
-              <div class="legend-item">Shape = Political/Ecclesiastical/Other</div>
-            </div>
-          </div>
-
-          <!-- Timeline Slider and Histogram -->
           <div class="timeline-wrapper">
             <Histogram />
             <DateSlider />
@@ -237,16 +200,15 @@
       </div>
     </div>
   {:else}
-    <!-- Loading state -->
     <div class="loading-container">
       <div class="loading-content">
         <div class="loading-spinner"></div>
         <h2>Loading Musical Renaissance Map...</h2>
         <div class="loading-details">
-          <p>📊 Critical data loaded: {hasCriticalData ? 'Yes' : 'No'}</p>
-          <p>🔧 Component mounted: {mounted ? 'Yes' : 'No'}</p>
-          <p>📁 Metadata keys: {Object.keys($mapData.METADATA || {}).join(', ') || 'None yet'}</p>
-          <p>⚡ Phase: {$mapData.isLoading ? 'Loading critical data (Events, Locations)...' : 'Ready for map rendering'}</p>
+          <p>Critical data loaded: {hasCriticalData ? 'Yes' : 'No'}</p>
+          <p>Component mounted: {mounted ? 'Yes' : 'No'}</p>
+          <p>Metadata keys: {Object.keys($mapData.METADATA || {}).join(', ') || 'None yet'}</p>
+          <p>Phase: {$mapData.isLoading ? 'Loading critical data (Events, Locations)...' : 'Ready for map rendering'}</p>
           {#if $mapData.isLoading}
             <p>⏳ Fetching essential data from Google Sheets...</p>
           {/if}
@@ -255,7 +217,6 @@
     </div>
   {/if}
 {:else}
-  <!-- Initial mounting state -->
   <div class="loading-container">
     <div class="loading-content">
       <h2>Initializing Application...</h2>
@@ -264,7 +225,6 @@
 {/if}
 
 <style>
-  /* Override layout styles for landing page */
   :global(.wrapper) {
     position: static !important;
     height: auto !important;
@@ -294,139 +254,113 @@
     height: 100vh;
   }
 
-  /* Landing Page Styles */
+  :global(.histogram) {
+  margin-top: 20px; /* Adjust this value as needed */
+  }
+
+  :global(.date-slider) {
+    margin-top: 10px;
+  }
+
   .landing-container {
     background-color: #f5f5f0;
-    height: calc(100vh - 60px); /* Reduced from 80px to give more space */
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .banner-section {
     background-color: #f0ede5;
     border: 2px solid #8b7355;
-    margin: 1rem 0.75rem;
-    padding: 1.5rem;
+    margin: 0.4rem 0.75rem;
+    padding: 1rem;
   }
 
   .banner-content h2 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.5rem 0;
     color: #2c2c2c;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
   .banner-content p {
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.4;
     color: #333;
+    font-size: 0.9rem;
   }
 
   .main-grid {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 0.5rem;
-    margin: 0.75rem;
+    margin: 0.1rem 0.75rem;
     flex: 1;
     min-height: 0;
+    overflow: hidden;
   }
 
-  /* Left Column Styles - Contains Search + Sidebar */
   .left-column {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    overflow: hidden;
   }
 
   .search-section {
     background-color: #f0ede5;
     border: 2px solid #8b7355;
-    padding: 1rem;
-    /* Same width as sidebar will be handled by the grid */
+    padding: 0.5rem;
   }
 
   .filters-section {
     background-color: #f0ede5;
     border: 2px solid #8b7355;
-    padding: 1rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
   }
 
-  /* Left Sidebar Styles */
   .left-sidebar {
     background-color: #f0ede5;
     border: 2px solid #8b7355;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    flex: 1; /* Take remaining space in left column */
-    max-height: calc(75vh - 2rem); /* Match map height minus some padding */
+    overflow: auto;
+    flex: 1;
   }
 
-  /* Map Area Styles */
   .map-area {
     background-color: #e8dcc0;
     border: 2px solid #8b7355;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .map-wrapper {
     position: relative;
-    flex: 1;
-    min-height: 0;
-    height: 75vh; /* Increased from 70vh to give more space */
-    overflow: visible;
+    height: 65vh;
+    overflow: hidden;
   }
 
   .timeline-wrapper {
-    padding: 0.75rem;
-    background-color: #f0ede5;
-    border-top: 1px solid #8b7355;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100px; /* Reduced from 120px to save space */
-  }
+  padding: 20px 0.5rem 0.5rem;
+  background-color: #f0ede5;
+  border-top: 1px solid #8b7355;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 25vh;
+ }
 
-  .legend-wrapper {
-    background-color: #f0ede5;
-    padding: 0.75rem;
-    border-top: 1px solid #8b7355;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-  }
-
-  .legend-wrapper h4 {
-    margin: 0 0 0.75rem 0;
-    color: #2c2c2c;
-    font-size: 1rem;
-  }
-
-  .legend-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .legend-item {
-    font-size: 0.9rem;
-    color: #333;
-  }
-
-  /* Partial Loading Banner */
   .partial-loading-banner {
     background: linear-gradient(90deg, #4CAF50, #45a049);
     color: white;
-    padding: 0.5rem;
+    padding: 0.25rem;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     animation: pulse 2s infinite;
   }
 
@@ -435,6 +369,7 @@
     50% { opacity: 0.8; }
     100% { opacity: 1; }
   }
+
   .loading-container {
     display: flex;
     justify-content: center;
@@ -517,31 +452,29 @@
     background: #0056b3;
   }
 
-  /* Responsive Design */
   @media (max-width: 1024px) {
     .main-grid {
       grid-template-columns: 1fr;
-      gap: 1rem;
+      gap: 0.5rem;
     }
   }
 
   @media (max-width: 768px) {
     .main-grid {
-      margin: 0.5rem;
+      margin: 0.25rem;
     }
 
     .banner-section {
-      margin: 0.5rem;
-      padding: 1rem;
+      margin: 0.25rem;
+      padding: 0.5rem;
     }
 
     .left-sidebar {
-      padding: 0.75rem;
+      max-height: 30vh;
     }
 
-    .legend-items {
-      flex-direction: column;
-      gap: 0.5rem;
+    .map-wrapper {
+      height: 50vh;
     }
   }
 </style>

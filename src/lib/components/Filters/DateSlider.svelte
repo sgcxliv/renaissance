@@ -135,7 +135,7 @@
   .slider-container {
     position: relative;
     width: 100%;
-    padding: 5px 0 30px 0;
+    padding: 5px 0 1px 0;
     background: transparent;
     border-radius: 0;
     margin-bottom: 0;
