@@ -1,3 +1,8 @@
+//
+// Svelte component that renders an interactive Leaflet map displaying historical events with clustering, filtering, and popup functionality.
+// Processes event data from stores, creates markers with custom styling based on person types, and handles map interactions including bounds restriction to Europe.
+// Features performance optimization with initial load limiting, viewport-based filtering, and real-time marker updates based on applied filters.
+//
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { mapData, lookupTables, headerIndex, markers, totalMarkers } from '$lib/stores/data.js';
