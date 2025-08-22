@@ -1,3 +1,8 @@
+<!--
+Svelte component that displays a collapsible sidebar with a list of visible map events and detailed event information with tabbed navigation.
+Shows event summaries with person names, dates, and descriptions, with click-to-expand functionality for detailed view including related suggestions.
+Features responsive design with tab switching between 'About' and 'Source' views and integrates with map state for event selection.
+-->
 <script>
   import { sidebarState, mappableEvents } from '$lib/stores/map.js';
   import { lookupTables } from '$lib/stores/data.js';
