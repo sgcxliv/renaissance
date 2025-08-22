@@ -1,3 +1,8 @@
+<!--
+Svelte component that renders checkboxes for filtering different person types (composers, musicians, non-musicians) with color-coded legend.
+Binds to global filter store to toggle visibility of person categories and displays corresponding color samples for map legend reference.
+Features responsive design that switches from vertical to horizontal layout on mobile devices.
+-->
 <script>
   import { filters } from '$lib/stores/filters.js';
 
