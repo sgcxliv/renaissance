@@ -1,3 +1,8 @@
+<!--
+Svelte component that displays detailed information about a historical event including person, location, date, and source documentation.
+Processes and formats biographical, geographical, institutional, archival, and bibliographic data from lookup tables with uncertainty indicators.
+Features comprehensive citation formatting for bibliography entries and handles multiple archival sources with proper signature display.
+-->
 <script>
   import { lookupTables, headerIndex } from '$lib/stores/data.js';
   import { findInfo } from '$lib/utils/dataProcessing.js';
